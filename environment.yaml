@@ -4,7 +4,7 @@ channels:
 dependencies:
   - _libgcc_mutex=0.1=main
   - _tflow_select=2.1.0=gpu
-  - absl-py=0.11.0=pyhd3eb1b0_1
+  - absl-py=0.12.0=py38h06a4308_0
   - aiohttp=3.7.4=py38h27cfd23_1
   - astunparse=1.6.3=py_0
   - async-timeout=3.0.1=py38h06a4308_0
@@ -25,10 +25,13 @@ dependencies:
   - cudnn=7.6.5=cuda10.1_0
   - cupti=10.1.168=0
   - cython=0.29.22=py38h2531618_0
+  - dill=0.3.3=pyhd3eb1b0_0
+  - future=0.18.2=py38_1
   - gast=0.3.3=py_0
   - google-auth=1.27.1=pyhd3eb1b0_0
   - google-auth-oauthlib=0.4.3=pyhd3eb1b0_0
   - google-pasta=0.2.0=py_0
+  - googleapis-common-protos=1.52.0=py38h06a4308_0
   - grpcio=1.36.1=py38h2157cd5_1
   - h5py=2.10.0=py38hd6299e0_1
   - hdf5=1.10.6=hb1b8bf9_0
@@ -48,6 +51,7 @@ dependencies:
   - mkl-service=2.3.0=py38he904b0f_0
   - mkl_fft=1.3.0=py38h54f3939_0
   - mkl_random=1.1.1=py38h0573a6f_0
+  - mock=4.0.3=pyhd3eb1b0_0
   - multidict=5.1.0=py38h27cfd23_2
   - ncurses=6.2=he6710b0_1
   - numpy=1.19.2=py38h54aff64_0
@@ -56,7 +60,9 @@ dependencies:
   - openssl=1.1.1j=h27cfd23_0
   - opt_einsum=3.1.0=py_0
   - pip=21.0.1=py38h06a4308_0
+  - promise=2.3=py38h06a4308_0
   - protobuf=3.14.0=py38h2531618_1
+  - psutil=5.8.0=py38h27cfd23_1
   - pyasn1=0.4.8=py_0
   - pyasn1-modules=0.2.8=py_0
   - pycparser=2.20=py_2
@@ -64,6 +70,7 @@ dependencies:
   - pyopenssl=20.0.1=pyhd3eb1b0_1
   - pysocks=1.7.1=py38h06a4308_0
   - python=3.8.8=hdb3f193_4
+  - pyyaml=5.4.1=py38h27cfd23_1
   - readline=8.1=h27cfd23_0
   - requests=2.25.1=pyhd3eb1b0_0
   - requests-oauthlib=1.3.0=py_0
@@ -76,10 +83,13 @@ dependencies:
   - tensorboard-plugin-wit=1.6.0=py_0
   - tensorflow=2.2.0=gpu_py38hb782248_0
   - tensorflow-base=2.2.0=gpu_py38h83e3d50_0
+  - tensorflow-datasets=1.2.0=py38h06a4308_0
   - tensorflow-estimator=2.2.0=pyh208ff02_0
   - tensorflow-gpu=2.2.0=h0d30ee6_0
+  - tensorflow-metadata=0.14.0=pyhe6710b0_1
   - termcolor=1.1.0=py38h06a4308_1
   - tk=8.6.10=hbc83047_0
+  - tqdm=4.56.0=pyhd3eb1b0_0
   - typing-extensions=3.7.4.3=hd3eb1b0_0
   - typing_extensions=3.7.4.3=pyh06a4308_0
   - urllib3=1.26.3=pyhd3eb1b0_0
@@ -87,8 +97,14 @@ dependencies:
   - wheel=0.36.2=pyhd3eb1b0_0
   - wrapt=1.12.1=py38h7b6447c_1
   - xz=5.2.5=h7b6447c_0
+  - yaml=0.2.5=h7b6447c_0
   - yarl=1.6.3=py38h27cfd23_0
   - zipp=3.4.0=pyhd3eb1b0_0
   - zlib=1.2.11=h7b6447c_3
+  - pip:
+    - dm-tree==0.1.5
+    - tensorflow-addons==0.10.0
+    - tensorflow-model-optimization==0.5.0
+    - typeguard==2.11.1
 prefix: /home/pedro/anaconda3/envs/atom
 
