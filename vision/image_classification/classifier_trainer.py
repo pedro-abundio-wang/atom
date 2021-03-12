@@ -41,12 +41,16 @@ from vision.image_classification import optimizer_factory
 from vision.image_classification.configs import base_configs
 from vision.image_classification.configs import configs
 from vision.image_classification.resnet import common
+from vision.image_classification.alexnet import alexnet_model
 from vision.image_classification.resnet import resnet_model
+from vision.image_classification.resnet import resnet18_model
 
 
 def get_models() -> Mapping[str, tf.keras.Model]:
   """Returns the mapping from model type name to Keras model."""
   return  {
+      'alexnet': alexnet_model.alexnet,
+      'resnet18': resnet18_model.resnet18,
       'resnet': resnet_model.resnet50,
   }
 
