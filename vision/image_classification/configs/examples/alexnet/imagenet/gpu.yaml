@@ -6,6 +6,7 @@ runtime:
   mode: 'train_and_eval'
   distribution_strategy: 'mirrored'
   num_gpus: 1
+  enable_xla: True
 train_dataset:
   name: 'imagenet2012'
   data_dir: null
