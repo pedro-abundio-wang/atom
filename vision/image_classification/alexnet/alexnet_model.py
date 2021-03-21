@@ -5,11 +5,7 @@ Related papers
 
 import tensorflow as tf
 
-from vision.image_classification.imagenet import imagenet_preprocessing
-
-L2_WEIGHT_DECAY = 1e-4
-BATCH_NORM_DECAY = 0.99
-BATCH_NORM_EPSILON = 1e-6
+L2_WEIGHT_DECAY = 5e-4
 
 
 def _gen_l2_regularizer(use_l2_regularizer=True):
@@ -18,38 +14,25 @@ def _gen_l2_regularizer(use_l2_regularizer=True):
 
 def alexnet(num_classes,
             batch_size=None,
-            use_l2_regularizer=True,
-            rescale_inputs=False):
+            use_l2_regularizer=True):
     """Instantiates the AlexNet architecture.
     Args:
       num_classes: `int` number of classes for image classification.
       batch_size: Size of the batches for each step.
       use_l2_regularizer: whether to use L2 regularizer on Conv/Dense layer.
-      rescale_inputs: whether to rescale inputs from 0 to 1.
     Returns:
         A Keras model instance.
     """
 
     input_shape = (227, 227, 3)
     img_input = tf.keras.layers.Input(shape=input_shape, batch_size=batch_size)
-    if rescale_inputs:
-        # Hub image modules expect inputs in the range [0, 1]. This rescales these
-        # inputs to the range expected by the trained model.
-        x = tf.keras.layers.Lambda(
-            lambda x: x * 255.0 - tf.keras.backend.constant(
-                imagenet_preprocessing.CHANNEL_MEANS,
-                shape=[1, 1, 3],
-                dtype=x.dtype),
-            name='rescale')(
-            img_input)
-    else:
-        x = img_input
+    x = img_input
 
     if tf.keras.backend.image_data_format() == 'channels_first':
         x = tf.keras.layers.Permute((3, 1, 2))(x)
-        bn_axis = 1
+        channel_axis = 1
     else:  # channels_last
-        bn_axis = -1
+        channel_axis = -1
 
     # stage1
     x = tf.keras.layers.Conv2D(
@@ -61,9 +44,7 @@ def alexnet(num_classes,
         kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
         name='stage1_conv')(x)
     x = tf.keras.layers.BatchNormalization(
-        axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
+        axis=channel_axis,
         name='stage1_bn')(x)
     x = tf.keras.layers.Activation('relu')(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(3, 3), strides=(2, 2), padding='valid')(x)
@@ -78,9 +59,7 @@ def alexnet(num_classes,
         kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
         name='stage2_conv')(x)
     x = tf.keras.layers.BatchNormalization(
-        axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
+        axis=channel_axis,
         name='stage2_bn')(x)
     x = tf.keras.layers.Activation('relu')(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(3, 3), strides=(2, 2), padding='valid')(x)
@@ -95,9 +74,7 @@ def alexnet(num_classes,
         kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
         name='stage3_conv')(x)
     x = tf.keras.layers.BatchNormalization(
-        axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
+        axis=channel_axis,
         name='stage3_bn')(x)
     x = tf.keras.layers.Activation('relu')(x)
 
@@ -111,9 +88,7 @@ def alexnet(num_classes,
         kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
         name='stage4_conv')(x)
     x = tf.keras.layers.BatchNormalization(
-        axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
+        axis=channel_axis,
         name='stage4_bn')(x)
     x = tf.keras.layers.Activation('relu')(x)
 
@@ -127,9 +102,7 @@ def alexnet(num_classes,
         kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
         name='stage5_conv')(x)
     x = tf.keras.layers.BatchNormalization(
-        axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
+        axis=channel_axis,
         name='stage5_bn')(x)
     x = tf.keras.layers.Activation('relu')(x)
     x = tf.keras.layers.MaxPool2D(pool_size=(3, 3), strides=(2, 2), padding='valid')(x)
@@ -139,30 +112,29 @@ def alexnet(num_classes,
     # fc
     x = tf.keras.layers.Dense(
         units=4096,
+        kernel_initializer='he_normal',
         kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
         name='fc')(x)
     x = tf.keras.layers.BatchNormalization(
-        axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
+        axis=channel_axis,
         name='bn')(x)
     x = tf.keras.layers.Activation('relu')(x)
     x = tf.keras.layers.Dropout(rate=0.5, name='dropout')(x)
 
     x = tf.keras.layers.Dense(
         units=4096,
+        kernel_initializer='he_normal',
         kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
         name='fc_')(x)
     x = tf.keras.layers.BatchNormalization(
-        axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
+        axis=channel_axis,
         name='bn_')(x)
     x = tf.keras.layers.Activation('relu')(x)
     x = tf.keras.layers.Dropout(rate=0.5, name='dropout_')(x)
 
     x = tf.keras.layers.Dense(
         units=num_classes,
+        kernel_initializer='he_normal',
         kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
         name='fc_score')(x)
 
