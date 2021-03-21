@@ -187,18 +187,18 @@ def resume_from_checkpoint(model: tf.keras.Model,
                            train_steps: int) -> int:
     """Resumes from the latest checkpoint, if possible.
 
-  Loads the model weights and optimizer settings from a checkpoint.
-  This function should be used in case of preemption recovery.
+    Loads the model weights and optimizer settings from a checkpoint.
+    This function should be used in case of preemption recovery.
 
-  Args:
-    model: The model whose weights should be restored.
-    model_dir: The directory where model weights were saved.
-    train_steps: The number of steps to train.
+    Args:
+      model: The model whose weights should be restored.
+      model_dir: The directory where model weights were saved.
+      train_steps: The number of steps to train.
 
-  Returns:
-    The epoch of the latest checkpoint, or 0 if not restoring.
+    Returns:
+      The epoch of the latest checkpoint, or 0 if not restoring.
 
-  """
+    """
     logging.info('Load from checkpoint is enabled.')
     latest_checkpoint = tf.train.latest_checkpoint(model_dir)
     logging.info('latest_checkpoint: %s', latest_checkpoint)
@@ -407,13 +407,13 @@ def run(flags_obj: flags.FlagValues,
         strategy_override: tf.distribute.Strategy = None) -> Mapping[str, Any]:
     """Runs Image Classification model using native Keras APIs.
 
-  Args:
-    flags_obj: An object containing parsed flag values.
-    strategy_override: A `tf.distribute.Strategy` object to use for model.
+    Args:
+      flags_obj: An object containing parsed flag values.
+      strategy_override: A `tf.distribute.Strategy` object to use for model.
 
-  Returns:
-    Dictionary of training/eval stats
-  """
+    Returns:
+      Dictionary of training/eval stats
+    """
     params = _get_params_from_flags(flags_obj)
     if params.mode == 'train_and_eval':
         return train_and_eval(params, strategy_override)
