@@ -38,16 +38,16 @@ def identity_block(input_tensor,
                    use_l2_regularizer=True):
     """The identity block is the block that has no conv layer at shortcut.
 
-      Args:
-        input_tensor: input tensor
-        kernel_size: default 3, the kernel size of middle conv layer at main path
-        filters: list of integers, the filters of 3 conv layer at main path
-        stage: integer, current stage label, used for generating layer names
-        block: 'a','b'..., current block label, used for generating layer names
-        use_l2_regularizer: whether to use L2 regularizer on Conv layer.
+    Args:
+      input_tensor: input tensor
+      kernel_size: default 3, the kernel size of middle conv layer at main path
+      filters: list of integers, the filters of 3 conv layer at main path
+      stage: integer, current stage label, used for generating layer names
+      block: 'a','b'..., current block label, used for generating layer names
+      use_l2_regularizer: whether to use L2 regularizer on Conv layer.
 
-      Returns:
-        Output tensor for the block.
+    Returns:
+      Output tensor for the block.
     """
 
     filters1, filters2, filters3 = filters
@@ -117,21 +117,21 @@ def conv_block(input_tensor,
                use_l2_regularizer=True):
     """A block that has a conv layer at shortcut.
 
-      Note that from stage 3,
-      the second conv layer at main path is with strides=(2, 2)
-      And the shortcut should have strides=(2, 2) as well
+    Note that from stage 3,
+    the second conv layer at main path is with strides=(2, 2)
+    And the shortcut should have strides=(2, 2) as well
 
-      Args:
-        input_tensor: input tensor
-        kernel_size: default 3, the kernel size of middle conv layer at main path
-        filters: list of integers, the filters of 3 conv layer at main path
-        stage: integer, current stage label, used for generating layer names
-        block: 'a','b'..., current block label, used for generating layer names
-        strides: Strides for the second conv layer in the block.
-        use_l2_regularizer: whether to use L2 regularizer on Conv layer.
+    Args:
+      input_tensor: input tensor
+      kernel_size: default 3, the kernel size of middle conv layer at main path
+      filters: list of integers, the filters of 3 conv layer at main path
+      stage: integer, current stage label, used for generating layer names
+      block: 'a','b'..., current block label, used for generating layer names
+      strides: Strides for the second conv layer in the block.
+      use_l2_regularizer: whether to use L2 regularizer on Conv layer.
 
-      Returns:
-        Output tensor for the block.
+    Returns:
+      Output tensor for the block.
     """
 
     filters1, filters2, filters3 = filters
@@ -213,14 +213,14 @@ def resnet50(num_classes,
              rescale_inputs=False):
     """Instantiates the ResNet50 architecture.
 
-      Args:
-        num_classes: `int` number of classes for image classification.
-        batch_size: Size of the batches for each step.
-        use_l2_regularizer: whether to use L2 regularizer on Conv/Dense layer.
-        rescale_inputs: whether to rescale inputs from 0 to 1.
+    Args:
+      num_classes: `int` number of classes for image classification.
+      batch_size: Size of the batches for each step.
+      use_l2_regularizer: whether to use L2 regularizer on Conv/Dense layer.
+      rescale_inputs: whether to rescale inputs from 0 to 1.
 
-      Returns:
-          A Keras model instance.
+    Returns:
+        A Keras model instance.
     """
 
     input_shape = (224, 224, 3)
