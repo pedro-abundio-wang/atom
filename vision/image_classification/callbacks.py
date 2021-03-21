@@ -3,7 +3,6 @@
 """Common modules for callbacks."""
 from __future__ import absolute_import
 from __future__ import division
-# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import os
@@ -115,8 +114,9 @@ class CustomTensorBoard(tf.keras.callbacks.TensorBoard):
 
     def _calculate_metrics(self) -> MutableMapping[str, Any]:
         logs = {}
-        if self._track_lr:
-            logs['learning_rate'] = self._calculate_lr()
+        # TODO(b/149030439): disable LR reporting.
+        # if self._track_lr:
+        #     logs['learning_rate'] = self._calculate_lr()
         return logs
 
     def _calculate_lr(self) -> int:
