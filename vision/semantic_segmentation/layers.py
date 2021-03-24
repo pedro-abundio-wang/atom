@@ -69,11 +69,11 @@ class MaxUnpooling2D(tf.keras.layers.Layer):
             y = mask // (output_shape[2] * output_shape[3])
             x = (mask // output_shape[3]) % output_shape[2]
             feature_range = tf.range(output_shape[3], dtype="int32")
-            f = one_like_mask * feature_range
+            c = one_like_mask * feature_range
 
             # transpose indices & reshape update values to one dimension
             updates_size = tf.size(updates)
-            indices = tf.transpose(tf.reshape(tf.stack([b, y, x, f]), [4, updates_size]))
+            indices = tf.transpose(tf.reshape(tf.stack([b, y, x, c]), [4, updates_size]))
             values = tf.reshape(updates, [updates_size])
             ret = tf.scatter_nd(indices, values, output_shape)
             return ret
