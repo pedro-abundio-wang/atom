@@ -15,6 +15,10 @@ PRELU_ALPHA = 0.25
 
 
 def initial_block(input_tensor):
+    """ENet initial block
+    :param input_tensor: input tensor
+    :return: initial block tensor
+    """
 
     if keras.backend.image_data_format() == 'channels_last':
         channel_axis = 3
@@ -52,6 +56,16 @@ def bottleneck(input_tensor,
                drop_rate=0.1,
                dilation_rate=(1, 1),
                projection_ratio=4):
+    """ENet bottleneck block
+    :param input_tensor: input tensor
+    :param filters: integer, the filters of conv layers at shortcut path
+    :param stage: integer, current stage label, used for generating layer names
+    :param block: integer, current block label, used for generating layer names
+    :param drop_rate: spatial dropout rate
+    :param dilation_rate: shortcut conv dilation rate
+    :param projection_ratio: integer, the projection ratio of conv layers at shortcut path
+    :return: bottleneck block tensor
+    """
 
     if keras.backend.image_data_format() == 'channels_last':
         channel_axis = -1
@@ -118,6 +132,18 @@ def upsampling(input_tensor,
                block,
                drop_rate=0.1,
                projection_ratio=4):
+    """ENet upsampling bottleneck block
+    :param input_tensor: input tensor
+    :param in_filters: integer, the input filters of conv layers at shortcut path
+    :param out_filters: integer, the out filters of conv layers at shortcut path
+    :param mask: upsampling max pooling masks
+    :param stage: integer, current stage label, used for generating layer names
+    :param block: integer, current block label, used for generating layer names
+    :param drop_rate: spatial dropout rate
+    :param projection_ratio: integer, the projection ratio of conv layers at shortcut path
+    :return: upsampling bottleneck block tensor
+    """
+
 
     if keras.backend.image_data_format() == 'channels_last':
         channel_axis = -1
@@ -197,6 +223,16 @@ def downsampling(input_tensor,
                  block,
                  drop_rate=0.1,
                  projection_ratio=4):
+    """ENet downsampling bottleneck block
+    :param input_tensor: input tensor
+    :param in_filters: integer, the input filters of conv layers at shortcut path
+    :param out_filters: integer, the out filters of conv layers at shortcut path
+    :param stage: integer, current stage label, used for generating layer names
+    :param block: integer, current block label, used for generating layer names
+    :param drop_rate: spatial dropout rate
+    :param projection_ratio: integer, the projection ratio of conv layers at shortcut path
+    :return: downsampling bottleneck block tensor
+    """
 
     if keras.backend.image_data_format() == 'channels_last':
         channel_axis = -1
@@ -267,6 +303,15 @@ def asymmetric(input_tensor,
                block,
                drop_rate=0.1,
                projection_ratio=4):
+    """ENet asymmetric bottleneck block
+    :param input_tensor: input tensor
+    :param filters: integer, the filters of conv layers at shortcut path
+    :param stage: integer, current stage label, used for generating layer names
+    :param block: integer, current block label, used for generating layer names
+    :param drop_rate: spatial dropout rate
+    :param projection_ratio: integer, the projection ratio of conv layers at shortcut path
+    :return: asymmetric bottleneck block tensor
+    """
 
     if keras.backend.image_data_format() == 'channels_last':
         channel_axis = -1
@@ -334,18 +379,24 @@ def asymmetric(input_tensor,
 
 
 def enet_encoder(input_tensor):
+    """ENet encoder
+    :param input_tensor: input tensor
+    :return: encoder tensor
+    """
 
     x = input_tensor
+    masks = []
 
     # stage1
-    x, mask1 = downsampling(x, in_filters=16, out_filters=64, stage=1, block=1, drop_rate=0.01)
+    x, mask = downsampling(x, in_filters=16, out_filters=64, stage=1, block=1, drop_rate=0.01)
     x = bottleneck(x, filters=64, stage=1, block=1, drop_rate=0.01)
     x = bottleneck(x, filters=64, stage=1, block=2, drop_rate=0.01)
     x = bottleneck(x, filters=64, stage=1, block=3, drop_rate=0.01)
     x = bottleneck(x, filters=64, stage=1, block=4, drop_rate=0.01)
+    masks.append(mask)
 
     # stage2
-    x, mask2 = downsampling(x, in_filters=64, out_filters=128, stage=2, block=0)
+    x, mask = downsampling(x, in_filters=64, out_filters=128, stage=2, block=0)
     x = bottleneck(x, filters=128, stage=2, block=1)
     x = bottleneck(x, filters=128, stage=2, block=2, dilation_rate=(2, 2))
     x = asymmetric(x, filters=128, stage=2, block=3)
@@ -354,6 +405,7 @@ def enet_encoder(input_tensor):
     x = bottleneck(x, filters=128, stage=2, block=6, dilation_rate=(8, 8))
     x = asymmetric(x, filters=128, stage=2, block=7)
     x = bottleneck(x, filters=128, stage=2, block=8, dilation_rate=(16, 16))
+    masks.append(mask)
 
     # stage3
     x = bottleneck(x, filters=128, stage=3, block=1)
@@ -365,22 +417,28 @@ def enet_encoder(input_tensor):
     x = asymmetric(x, filters=128, stage=3, block=7)
     x = bottleneck(x, filters=128, stage=3, block=8, dilation_rate=(16, 16))
 
-    return x, mask1, mask2
+    return x, masks
 
 
 def enet_decoder(input_tensor,
                  masks,
                  num_classes):
+    """ENet decoder
+    :param input_tensor: input tensor
+    :param masks: upsampling max pooling masks
+    :param num_classes: `int` number of classes for semantic segmentation.
+    :return: decoder tensor
+    """
 
-    mask1, mask2 = masks
+    masks.reverse()
 
     # stage4
-    x = upsampling(input_tensor, in_filters=128, out_filters=64, mask=mask2, stage=4, block=0)
+    x = upsampling(input_tensor, in_filters=128, out_filters=64, mask=masks.pop(), stage=4, block=0)
     x = bottleneck(x, filters=64, stage=4, block=1)
     x = bottleneck(x, filters=64, stage=4, block=2)
 
     # stage5
-    x = upsampling(x, in_filters=64, out_filters=16, mask=mask1, stage=5, block=0)
+    x = upsampling(x, in_filters=64, out_filters=16, mask=masks.pop(), stage=5, block=0)
     x = bottleneck(x, filters=16, stage=5, block=1)
 
     # full conv
@@ -400,14 +458,23 @@ def enet_decoder(input_tensor,
 
 def enet(num_classes,
          batch_size=None):
+    """Instantiates the ENet architecture.
+
+    Args:
+      num_classes: `int` number of classes for semantic segmentation.
+      batch_size: Size of the batches for each step.
+
+    Returns:
+        A Keras model instance.
+    """
 
     input_shape = (512, 512, 3)
     img_input = keras.layers.Input(shape=input_shape, batch_size=batch_size)
     x = img_input
 
     x = initial_block(x)
-    x, mask1, mask2 = enet_encoder(x)
-    x = enet_decoder(x, [mask1, mask2], num_classes)
+    x, masks = enet_encoder(x)
+    x = enet_decoder(x, masks, num_classes)
 
     # Create model.
     return keras.models.Model(img_input, x, name='enet')
