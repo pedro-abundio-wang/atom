@@ -10,7 +10,7 @@ from tensorflow import keras
 
 import vision.semantic_segmentation.layers as layers
 
-L2_WEIGHT_DECAY = 1e-4
+L2_WEIGHT_DECAY = 2e-4
 PRELU_ALPHA = 0.25
 
 
