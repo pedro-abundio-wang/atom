@@ -50,7 +50,8 @@ def initial_block(input_tensor):
 
 
 def bottleneck(input_tensor,
-               filters,
+               in_filters,
+               out_filters,
                stage,
                block,
                drop_rate=0.1,
@@ -58,7 +59,8 @@ def bottleneck(input_tensor,
                projection_ratio=4):
     """ENet bottleneck block
     :param input_tensor: input tensor
-    :param filters: integer, the filters of conv layers at shortcut path
+    :param in_filters: integer, the input filters of conv layers at shortcut path
+    :param out_filters: integer, the out filters of conv layers at shortcut path
     :param stage: integer, current stage label, used for generating layer names
     :param block: integer, current block label, used for generating layer names
     :param drop_rate: spatial dropout rate
@@ -73,7 +75,7 @@ def bottleneck(input_tensor,
         channel_axis = 1
 
     name_base = 'stage' + str(stage) + '_' + 'block' + str(block)
-    reduced_depth = filters // projection_ratio
+    reduced_depth = in_filters // projection_ratio
 
     shortcut = keras.layers.Conv2D(
         filters=reduced_depth,
@@ -105,7 +107,7 @@ def bottleneck(input_tensor,
     shortcut = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
 
     shortcut = keras.layers.Conv2D(
-        filters=filters,
+        filters=out_filters,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
@@ -298,14 +300,16 @@ def downsampling(input_tensor,
 
 
 def asymmetric(input_tensor,
-               filters,
+               in_filters,
+               out_filters,
                stage,
                block,
                drop_rate=0.1,
                projection_ratio=4):
     """ENet asymmetric bottleneck block
     :param input_tensor: input tensor
-    :param filters: integer, the filters of conv layers at shortcut path
+    :param in_filters: integer, the input filters of conv layers at shortcut path
+    :param out_filters: integer, the out filters of conv layers at shortcut path
     :param stage: integer, current stage label, used for generating layer names
     :param block: integer, current block label, used for generating layer names
     :param drop_rate: spatial dropout rate
@@ -319,7 +323,7 @@ def asymmetric(input_tensor,
         channel_axis = 1
 
     name_base = 'stage' + str(stage) + '_' + 'block' + str(block)
-    reduced_depth = filters // projection_ratio
+    reduced_depth = in_filters // projection_ratio
 
     shortcut = keras.layers.Conv2D(
         filters=reduced_depth,
@@ -359,7 +363,7 @@ def asymmetric(input_tensor,
     shortcut = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
 
     shortcut = keras.layers.Conv2D(
-        filters=filters,
+        filters=out_filters,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
@@ -389,33 +393,33 @@ def enet_encoder(input_tensor):
 
     # stage1
     x, mask = downsampling(x, in_filters=16, out_filters=64, stage=1, block=1, drop_rate=0.01)
-    x = bottleneck(x, filters=64, stage=1, block=1, drop_rate=0.01)
-    x = bottleneck(x, filters=64, stage=1, block=2, drop_rate=0.01)
-    x = bottleneck(x, filters=64, stage=1, block=3, drop_rate=0.01)
-    x = bottleneck(x, filters=64, stage=1, block=4, drop_rate=0.01)
+    x = bottleneck(x, in_filters=64, out_filters=64, stage=1, block=1, drop_rate=0.01)
+    x = bottleneck(x, in_filters=64, out_filters=64, stage=1, block=2, drop_rate=0.01)
+    x = bottleneck(x, in_filters=64, out_filters=64, stage=1, block=3, drop_rate=0.01)
+    x = bottleneck(x, in_filters=64, out_filters=64, stage=1, block=4, drop_rate=0.01)
     masks.append(mask)
 
     # stage2
     x, mask = downsampling(x, in_filters=64, out_filters=128, stage=2, block=0)
-    x = bottleneck(x, filters=128, stage=2, block=1)
-    x = bottleneck(x, filters=128, stage=2, block=2, dilation_rate=(2, 2))
-    x = asymmetric(x, filters=128, stage=2, block=3)
-    x = bottleneck(x, filters=128, stage=2, block=4, dilation_rate=(4, 4))
-    x = bottleneck(x, filters=128, stage=2, block=5)
-    x = bottleneck(x, filters=128, stage=2, block=6, dilation_rate=(8, 8))
-    x = asymmetric(x, filters=128, stage=2, block=7)
-    x = bottleneck(x, filters=128, stage=2, block=8, dilation_rate=(16, 16))
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=2, block=1)
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=2, block=2, dilation_rate=(2, 2))
+    x = asymmetric(x, in_filters=128, out_filters=128, stage=2, block=3)
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=2, block=4, dilation_rate=(4, 4))
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=2, block=5)
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=2, block=6, dilation_rate=(8, 8))
+    x = asymmetric(x, in_filters=128, out_filters=128, stage=2, block=7)
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=2, block=8, dilation_rate=(16, 16))
     masks.append(mask)
 
     # stage3
-    x = bottleneck(x, filters=128, stage=3, block=1)
-    x = bottleneck(x, filters=128, stage=3, block=2, dilation_rate=(2, 2))
-    x = asymmetric(x, filters=128, stage=3, block=3)
-    x = bottleneck(x, filters=128, stage=3, block=4, dilation_rate=(4, 4))
-    x = bottleneck(x, filters=128, stage=3, block=5)
-    x = bottleneck(x, filters=128, stage=3, block=6, dilation_rate=(8, 8))
-    x = asymmetric(x, filters=128, stage=3, block=7)
-    x = bottleneck(x, filters=128, stage=3, block=8, dilation_rate=(16, 16))
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=3, block=1)
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=3, block=2, dilation_rate=(2, 2))
+    x = asymmetric(x, in_filters=128, out_filters=128, stage=3, block=3)
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=3, block=4, dilation_rate=(4, 4))
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=3, block=5)
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=3, block=6, dilation_rate=(8, 8))
+    x = asymmetric(x, in_filters=128, out_filters=128, stage=3, block=7)
+    x = bottleneck(x, in_filters=128, out_filters=128, stage=3, block=8, dilation_rate=(16, 16))
 
     return x, masks
 
@@ -434,15 +438,15 @@ def enet_decoder(input_tensor,
 
     # stage4
     x = upsampling(input_tensor, in_filters=128, out_filters=64, mask=masks.pop(), stage=4, block=0)
-    x = bottleneck(x, filters=64, stage=4, block=1)
-    x = bottleneck(x, filters=64, stage=4, block=2)
+    x = bottleneck(x, in_filters=64, out_filters=64, stage=4, block=1)
+    x = bottleneck(x, in_filters=64, out_filters=64, stage=4, block=2)
 
     # stage5
     x = upsampling(x, in_filters=64, out_filters=16, mask=masks.pop(), stage=5, block=0)
-    x = bottleneck(x, filters=16, stage=5, block=1)
+    x = bottleneck(x, in_filters=16, out_filters=16, stage=5, block=1)
 
     # full conv
-    x = keras.layers.ConvTranspose2d(
+    x = keras.layers.Conv2DTranspose(
         filters=num_classes,
         kernel_size=(3, 3),
         strides=(2, 2),
