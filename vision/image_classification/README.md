@@ -2,7 +2,9 @@
 
 * [Classifier Trainer](#classifier-trainer), a framework that uses the Keras
 compile/fit methods for image classification models, including:
-  * AlexNet
+  * AlexNet (loss: 3.1398 - top_5_accuracy: 0.7995 - accuracy: 0.5642)
+
+
 
 ### ImageNet preparation
 
@@ -26,14 +28,12 @@ by the number of devices. For instance, if `batch size` = 64, then for 1 GPU
 the global batch size would be 64 * 1 = 64. For 8 GPUs, the global batch size
 would be 64 * 8 = 512.
 
-### AlexNet
-
 ```bash
 python classifier_trainer.py \
   --mode=train_and_eval \
-  --model_type=alexnet \
+  --model_type=$MODEL_NAME \
   --dataset=imagenet \
   --model_dir=$MODEL_DIR \
   --data_dir=$DATA_DIR \
-  --config_file=configs/examples/alexnet/imagenet/gpu.yaml
+  --config_file=configs/examples/$MODEL/imagenet/gpu.yaml
 ```
