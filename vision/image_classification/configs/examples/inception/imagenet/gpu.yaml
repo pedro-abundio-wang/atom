@@ -35,8 +35,6 @@ validation_dataset:
   standardize: True
 model:
   model_name: 'googlenet'
-  model_params:
-    rescale_inputs: False
   optimizer:
     name: 'momentum'
     momentum: 0.9

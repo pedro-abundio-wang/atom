@@ -6,62 +6,69 @@ Related papers:
 
 """
 
-from tensorflow import keras
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+from tensorflow.keras import backend
+from tensorflow.keras import models
+from tensorflow.keras import regularizers
+from tensorflow.keras import layers
 
 L2_WEIGHT_DECAY = 1e-4
 
 
 def stem_block(input_tensor):
 
-    if keras.backend.image_data_format() == 'channels_last':
-        channel_axis = 3
+    if backend.image_data_format() == 'channels_last':
+        channel_axis = -1
     else:
         channel_axis = 1
 
     # stage1
-    x = keras.layers.Conv2D(
+    x = layers.Conv2D(
         filters=64,
         kernel_size=(7, 7),
         strides=(2, 2),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='stage1_conv7x7')(input_tensor)
-    x = keras.layers.BatchNormalization(
+    x = layers.BatchNormalization(
         axis=channel_axis,
         name='stage1_bn7x7')(x)
-    x = keras.layers.Activation('relu')(x)
-    x = keras.layers.MaxPool2D(
+    x = layers.Activation('relu')(x)
+    x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
         padding='same')(x)
 
     # stage2
-    x = keras.layers.Conv2D(
+    x = layers.Conv2D(
         filters=64,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='stage2_conv3x3_reduce')(x)
-    x = keras.layers.BatchNormalization(
+    x = layers.BatchNormalization(
         axis=channel_axis,
         name='stage2_bn3x3_reduce')(x)
-    x = keras.layers.Activation('relu')(x)
-    x = keras.layers.Conv2D(
+    x = layers.Activation('relu')(x)
+    x = layers.Conv2D(
         filters=192,
         kernel_size=(3, 3),
         strides=(1, 1),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='stage2_conv3x3')(x)
-    x = keras.layers.BatchNormalization(
+    x = layers.BatchNormalization(
         axis=channel_axis,
         name='stage2_bn3x3')(x)
-    x = keras.layers.Activation('relu')(x)
-    x = keras.layers.MaxPool2D(
+    x = layers.Activation('relu')(x)
+    x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
         padding='same')(x)
@@ -95,113 +102,111 @@ def inception_block(input_tensor,
         Output tensor for the block.
     """
 
-    if keras.backend.image_data_format() == 'channels_last':
-        channel_axis = 3
+    if backend.image_data_format() == 'channels_last':
+        channel_axis = -1
     else:
         channel_axis = 1
 
     name_base = str(stage) + block
 
-    branch1x1 = keras.layers.Conv2D(
+    branch1x1 = layers.Conv2D(
         filters=num1x1,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv1x1')(input_tensor)
-    branch1x1 = keras.layers.BatchNormalization(
+    branch1x1 = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn1x1')(branch1x1)
-    branch1x1 = keras.layers.Activation('relu')(branch1x1)
+    branch1x1 = layers.Activation('relu')(branch1x1)
 
-    branch3x3 = keras.layers.Conv2D(
+    branch3x3 = layers.Conv2D(
         filters=num3x3_reduce,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv3x3_reduce')(input_tensor)
-    branch3x3 = keras.layers.BatchNormalization(
+    branch3x3 = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn3x3_reduce')(branch3x3)
-    branch3x3 = keras.layers.Activation('relu')(branch3x3)
-    branch3x3 = keras.layers.Conv2D(
+    branch3x3 = layers.Activation('relu')(branch3x3)
+    branch3x3 = layers.Conv2D(
         filters=num3x3,
         kernel_size=(3, 3),
         strides=(1, 1),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv3x3')(branch3x3)
-    branch3x3 = keras.layers.BatchNormalization(
+    branch3x3 = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn3x3')(branch3x3)
-    branch3x3 = keras.layers.Activation('relu')(branch3x3)
+    branch3x3 = layers.Activation('relu')(branch3x3)
 
-    branch5x5 = keras.layers.Conv2D(
+    branch5x5 = layers.Conv2D(
         filters=num5x5_reduce,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv5x5_reduce')(input_tensor)
-    branch5x5 = keras.layers.BatchNormalization(
+    branch5x5 = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn5x5_reduce')(branch5x5)
-    branch5x5 = keras.layers.Activation('relu')(branch5x5)
-    branch5x5 = keras.layers.Conv2D(
+    branch5x5 = layers.Activation('relu')(branch5x5)
+    branch5x5 = layers.Conv2D(
         filters=num5x5,
         kernel_size=(5, 5),
         strides=(1, 1),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv5x5')(branch5x5)
-    branch5x5 = keras.layers.BatchNormalization(
+    branch5x5 = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn5x5')(branch5x5)
-    branch5x5 = keras.layers.Activation('relu')(branch5x5)
+    branch5x5 = layers.Activation('relu')(branch5x5)
 
-    branch_pool = keras.layers.MaxPool2D(
+    branch_pool = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(1, 1),
         padding='same')(input_tensor)
-    branch_pool = keras.layers.Conv2D(
+    branch_pool = layers.Conv2D(
         filters=pool_reduce,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_pool_reduce')(branch_pool)
-    branch_pool = keras.layers.BatchNormalization(
+    branch_pool = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_pool_bn')(branch_pool)
-    branch_pool = keras.layers.Activation('relu')(branch_pool)
+    branch_pool = layers.Activation('relu')(branch_pool)
 
-    x = keras.layers.Concatenate(axis=channel_axis)([branch1x1, branch3x3, branch5x5, branch_pool])
+    x = layers.Concatenate(axis=channel_axis)([branch1x1, branch3x3, branch5x5, branch_pool])
 
     return x
 
 
 def googlenet(num_classes,
-              use_l2_regularizer=True,
               batch_size=None):
     """Instantiates the GoogLeNet architecture.
 
     Arguments:
         num_classes: `int` number of classes for image classification.
         batch_size: Size of the batches for each step.
-        use_l2_regularizer: whether to use L2 regularizer on Conv/Dense layer.
 
     Returns:
         A Keras model instance.
     """
     input_shape = (224, 224, 3)
-    img_input = keras.layers.Input(shape=input_shape, batch_size=batch_size)
+    img_input = layers.Input(shape=input_shape, batch_size=batch_size)
     x = img_input
 
     # stem stage
@@ -232,7 +237,7 @@ def googlenet(num_classes,
         block='b')
 
     # stage3 pool
-    x = keras.layers.MaxPool2D(
+    x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
         padding='same')(x)
@@ -298,7 +303,7 @@ def googlenet(num_classes,
         block='e')
 
     # stage4 pool
-    x = keras.layers.MaxPool2D(
+    x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
         padding='same')(x)
@@ -328,20 +333,20 @@ def googlenet(num_classes,
         block='b')
 
     # classifier
-    x = keras.layers.GlobalAveragePooling2D()(x)
-    x = keras.layers.Dropout(rate=0.4)(x)
-    x = keras.layers.Dense(
+    x = layers.GlobalAveragePooling2D()(x)
+    x = layers.Dropout(rate=0.4)(x)
+    x = layers.Dense(
         units=num_classes,
-        kernel_initializer=keras.initializers.RandomNormal(stddev=0.01),
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_initializer='he_normal',
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='fc1000')(x)
 
     # A softmax that is followed by the model loss must be done cannot be done
     # in float16 due to numeric issues. So we pass dtype=float32.
-    x = keras.layers.Activation('softmax', dtype='float32')(x)
+    x = layers.Activation('softmax', dtype='float32')(x)
 
     # Create model.
-    return keras.models.Model(img_input, x, name='googlenet')
+    return models.Model(img_input, x, name='googlenet')
 
 
 

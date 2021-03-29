@@ -29,7 +29,6 @@ class GoogLeNetModelConfig(base_configs.ModelConfig):
     model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
         'num_classes': 1000,
         'batch_size': None,
-        'use_l2_regularizer': True
     })
     loss: base_configs.LossConfig = base_configs.LossConfig(
         name='sparse_categorical_crossentropy')
