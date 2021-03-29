@@ -300,7 +300,7 @@ def resnet18(num_classes,
                      stage=4, conv_strides=(2, 2), **block_config)
 
     x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[512, 512],
-                     stage=4, conv_strides=(2, 2), **block_config)
+                     stage=5, conv_strides=(2, 2), **block_config)
 
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dense(
