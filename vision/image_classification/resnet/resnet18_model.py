@@ -1,29 +1,27 @@
-"""ResNet model for Keras.
+"""ResNet18 model for Keras.
+
 Related papers
 - https://arxiv.org/abs/1512.03385
+
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from tensorflow.keras import backend
-from tensorflow.keras import initializers
 from tensorflow.keras import models
 from tensorflow.keras import regularizers
 from tensorflow.keras import layers
-from vision.image_classification.imagenet import imagenet_preprocessing
 
-
-def l2_regularizer(use_l2_regularizer=True, l2_weight_decay=1e-4):
-    return regularizers.l2(l2_weight_decay) if use_l2_regularizer else None
+L2_WEIGHT_DECAY = 1e-4
 
 
 def identity_block(input_tensor,
                    kernel_size,
                    filters,
                    stage,
-                   block,
-                   use_l2_regularizer=True,
-                   batch_norm_decay=0.99,
-                   batch_norm_epsilon=1e-5,
-                   training=None):
+                   block):
 
     """The identity block is the block that has no conv layer at shortcut.
 
@@ -33,18 +31,13 @@ def identity_block(input_tensor,
       filters: list of integers, the filters of 2 conv layer at main path
       stage: integer, current stage label, used for generating layer names
       block: current block label, used for generating layer names
-      use_l2_regularizer: whether to use L2 regularizer on Conv layer.
-      batch_norm_decay: Moment of batch norm layers.
-      batch_norm_epsilon: Epsilon of batch borm layers.
-      training: Only used if training keras model with Estimator.  In other
-        scenarios it is handled automatically.
 
     Returns:
       Output tensor for the block.
     """
     filters1, filters2 = filters
     if backend.image_data_format() == 'channels_last':
-        bn_axis = 3
+        bn_axis = -1
     else:
         bn_axis = 1
     conv_name_base = 'res' + str(stage) + block + '_branch'
@@ -55,15 +48,12 @@ def identity_block(input_tensor,
         kernel_size=kernel_size,
         strides=(1, 1),
         padding='same',
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2a')(input_tensor)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=batch_norm_decay,
-        epsilon=batch_norm_epsilon,
-        name=bn_name_base + '2a')(x, training=training)
+        name=bn_name_base + '2a')(x)
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
@@ -71,15 +61,12 @@ def identity_block(input_tensor,
         kernel_size=kernel_size,
         strides=(1, 1),
         padding='same',
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2b')(x)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=batch_norm_decay,
-        epsilon=batch_norm_epsilon,
-        name=bn_name_base + '2b')(x, training=training)
+        name=bn_name_base + '2b')(x)
 
     x = layers.add([x, input_tensor])
     x = layers.Activation('relu')(x)
@@ -92,11 +79,7 @@ def conv_block(input_tensor,
                filters,
                stage,
                block,
-               strides=(2, 2),
-               use_l2_regularizer=True,
-               batch_norm_decay=0.99,
-               batch_norm_epsilon=1e-5,
-               training=None):
+               strides=(2, 2)):
 
     """A block that has a conv layer at shortcut.
 
@@ -111,18 +94,13 @@ def conv_block(input_tensor,
       stage: integer, current stage label, used for generating layer names
       block: current block label, used for generating layer names
       strides: Strides for the first conv layer in the block.
-      use_l2_regularizer: whether to use L2 regularizer on Conv layer.
-      batch_norm_decay: Moment of batch norm layers.
-      batch_norm_epsilon: Epsilon of batch borm layers.
-      training: Only used if training keras model with Estimator.  In other
-        scenarios it is handled automatically.
 
     Returns:
       Output tensor for the block.
     """
     filters1, filters2 = filters
     if backend.image_data_format() == 'channels_last':
-        bn_axis = 3
+        bn_axis = -1
     else:
         bn_axis = 1
     conv_name_base = 'res' + str(stage) + block + '_branch'
@@ -133,15 +111,12 @@ def conv_block(input_tensor,
         kernel_size=kernel_size,
         strides=strides,
         padding='same',
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2a')(input_tensor)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=batch_norm_decay,
-        epsilon=batch_norm_epsilon,
-        name=bn_name_base + '2a')(x, training=training)
+        name=bn_name_base + '2a')(x)
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
@@ -149,29 +124,23 @@ def conv_block(input_tensor,
         kernel_size=kernel_size,
         strides=(1, 1),
         padding='same',
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2b')(x)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=batch_norm_decay,
-        epsilon=batch_norm_epsilon,
-        name=bn_name_base + '2b')(x, training=training)
+        name=bn_name_base + '2b')(x)
 
     shortcut = layers.Conv2D(
         filters=filters2,
         kernel_size=(1, 1),
         strides=strides,
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '1')(input_tensor)
     shortcut = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=batch_norm_decay,
-        epsilon=batch_norm_epsilon,
-        name=bn_name_base + '1')(shortcut, training=training)
+        name=bn_name_base + '1')(shortcut)
 
     x = layers.add([x, shortcut])
     x = layers.Activation('relu')(x)
@@ -184,11 +153,7 @@ def resnet_block(input_tensor,
                  kernel_size,
                  filters,
                  stage,
-                 conv_strides=(2, 2),
-                 use_l2_regularizer=True,
-                 batch_norm_decay=0.99,
-                 batch_norm_epsilon=1e-5,
-                 training=None):
+                 conv_strides=(2, 2)):
     """A block which applies conv followed by multiple identity blocks.
 
     Arguments:
@@ -199,48 +164,28 @@ def resnet_block(input_tensor,
       filters: list of integers, the filters of 2 conv layer at main path
       stage: integer, current stage label, used for generating layer names
       conv_strides: Strides for the first conv layer in the block.
-      use_l2_regularizer: whether to use L2 regularizer on Conv layer.
-      batch_norm_decay: Moment of batch norm layers.
-      batch_norm_epsilon: Epsilon of batch borm layers.
-      training: Only used if training keras model with Estimator.  In other
-        scenarios it is handled automatically.
 
     Returns:
       Output tensor after applying conv and identity blocks.
     """
 
     x = conv_block(input_tensor, kernel_size, filters,
-                   stage, 'block_0', conv_strides,
-                   use_l2_regularizer, batch_norm_decay,
-                   batch_norm_epsilon, training=training)
+                   stage, 'block_0', conv_strides)
 
     for i in range(size - 1):
         x = identity_block(x, kernel_size, filters,
-                           stage, 'block_%d' % (i + 1),
-                           use_l2_regularizer, batch_norm_decay,
-                           batch_norm_epsilon, training=training)
+                           stage, 'block_%d' % (i + 1))
     return x
 
 
 def resnet18(num_classes,
-             batch_size=None,
-             use_l2_regularizer=True,
-             rescale_inputs=False,
-             batch_norm_decay=0.9,
-             batch_norm_epsilon=1e-5,
-             training=None):
+             batch_size=None):
 
     """Instantiates the ResNet architecture.
 
     Arguments:
       num_classes: optional number of classes to classify images into
       batch_size: Size of the batches for each step.
-      use_l2_regularizer: whether to use L2 regularizer on Conv/Dense layer.
-      rescale_inputs: whether to rescale inputs from 0 to 1.
-      batch_norm_decay: Moment of batch norm layers.
-      batch_norm_epsilon: Epsilon of batch norm layers.
-      training: Only used if training keras model with Estimator.  In other
-      scenarios it is handled automatically.
 
     Returns:
       A Keras model instance.
@@ -248,29 +193,13 @@ def resnet18(num_classes,
 
     input_shape = (224, 224, 3)
     img_input = layers.Input(shape=input_shape, batch_size=batch_size)
-    if rescale_inputs:
-        # Hub image modules expect inputs in the range [0, 1]. This rescales these
-        # inputs to the range expected by the trained model.
-        x = layers.Lambda(
-            lambda image: image * 255.0 - backend.constant(
-                imagenet_preprocessing.CHANNEL_MEANS,
-                shape=[1, 1, 3],
-                dtype=image.dtype),
-            name='rescale')(img_input)
-    else:
-        x = img_input
+    x = img_input
 
     if backend.image_data_format() == 'channels_first':
         x = layers.Permute((3, 1, 2))(x)
         bn_axis = 1
     else:  # channels_last
-        bn_axis = 3
-
-    block_config = dict(
-        use_l2_regularizer=use_l2_regularizer,
-        batch_norm_decay=batch_norm_decay,
-        batch_norm_epsilon=batch_norm_epsilon,
-        training=training)
+        bn_axis = -1
 
     x = layers.ZeroPadding2D(padding=(3, 3), name='conv1_pad')(x)
     x = layers.Conv2D(
@@ -278,36 +207,32 @@ def resnet18(num_classes,
         kernel_size=(7, 7),
         strides=(2, 2),
         padding='valid',
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='conv1')(x)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=batch_norm_decay,
-        epsilon=batch_norm_epsilon,
         name='bn_conv1')(x)
     x = layers.Activation('relu')(x)
     x = layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same')(x)
 
     x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[64, 64],
-                     stage=2, conv_strides=(1, 1), **block_config)
+                     stage=2, conv_strides=(1, 1))
 
     x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[128, 128],
-                     stage=3, conv_strides=(2, 2), **block_config)
+                     stage=3, conv_strides=(2, 2))
 
     x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[256, 256],
-                     stage=4, conv_strides=(2, 2), **block_config)
+                     stage=4, conv_strides=(2, 2))
 
     x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[512, 512],
-                     stage=5, conv_strides=(2, 2), **block_config)
+                     stage=5, conv_strides=(2, 2))
 
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dense(
         units=num_classes,
-        kernel_initializer=initializers.RandomNormal(stddev=0.01),
-        kernel_regularizer=l2_regularizer(use_l2_regularizer),
-        bias_regularizer=l2_regularizer(use_l2_regularizer),
+        kernel_initializer='he_normal',
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='fc1000')(x)
 
     # A softmax that is followed by the model loss must be done

@@ -1,41 +1,27 @@
 """ResNet50 model for Keras.
 
-Adapted from tf.keras.applications.resnet50.ResNet50().
-This is ResNet model version 1.5.
-
 Related papers/blogs:
 - https://arxiv.org/abs/1512.03385
-- https://arxiv.org/pdf/1603.05027v2.pdf
-- http://torch.ch/blog/2016/02/04/resnets.html
 
 """
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 from tensorflow.python.keras import layers
 from tensorflow.python.keras import backend
-from tensorflow.python.keras import initializers
 from tensorflow.python.keras import models
 from tensorflow.python.keras import regularizers
 
-from vision.image_classification.imagenet import imagenet_preprocessing
-
 L2_WEIGHT_DECAY = 1e-4
-BATCH_NORM_DECAY = 0.9
-BATCH_NORM_EPSILON = 1e-5
-
-
-def _gen_l2_regularizer(use_l2_regularizer=True):
-    return regularizers.l2(L2_WEIGHT_DECAY) if use_l2_regularizer else None
 
 
 def identity_block(input_tensor,
                    kernel_size,
                    filters,
                    stage,
-                   block,
-                   use_l2_regularizer=True):
+                   block):
     """The identity block is the block that has no conv layer at shortcut.
 
     Args:
@@ -44,7 +30,6 @@ def identity_block(input_tensor,
       filters: list of integers, the filters of 3 conv layer at main path
       stage: integer, current stage label, used for generating layer names
       block: 'a','b'..., current block label, used for generating layer names
-      use_l2_regularizer: whether to use L2 regularizer on Conv layer.
 
     Returns:
       Output tensor for the block.
@@ -53,7 +38,7 @@ def identity_block(input_tensor,
     filters1, filters2, filters3 = filters
 
     if backend.image_data_format() == 'channels_last':
-        bn_axis = 3
+        bn_axis = -1
     else:
         bn_axis = 1
 
@@ -63,14 +48,11 @@ def identity_block(input_tensor,
     x = layers.Conv2D(
         filters1,
         (1, 1),
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2a')(input_tensor)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
         name=bn_name_base + '2a')(x)
     x = layers.Activation('relu')(x)
 
@@ -78,28 +60,22 @@ def identity_block(input_tensor,
         filters2,
         kernel_size,
         padding='same',
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2b')(x)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
         name=bn_name_base + '2b')(x)
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
         filters3,
         (1, 1),
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2c')(x)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
         name=bn_name_base + '2c')(x)
 
     x = layers.add([x, input_tensor])
@@ -113,8 +89,7 @@ def conv_block(input_tensor,
                filters,
                stage,
                block,
-               strides=(2, 2),
-               use_l2_regularizer=True):
+               strides=(2, 2)):
     """A block that has a conv layer at shortcut.
 
     Note that from stage 3,
@@ -128,7 +103,6 @@ def conv_block(input_tensor,
       stage: integer, current stage label, used for generating layer names
       block: 'a','b'..., current block label, used for generating layer names
       strides: Strides for the second conv layer in the block.
-      use_l2_regularizer: whether to use L2 regularizer on Conv layer.
 
     Returns:
       Output tensor for the block.
@@ -137,7 +111,7 @@ def conv_block(input_tensor,
     filters1, filters2, filters3 = filters
 
     if backend.image_data_format() == 'channels_last':
-        bn_axis = 3
+        bn_axis = -1
     else:
         bn_axis = 1
 
@@ -147,14 +121,11 @@ def conv_block(input_tensor,
     x = layers.Conv2D(
         filters1,
         (1, 1),
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2a')(input_tensor)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
         name=bn_name_base + '2a')(x)
     x = layers.Activation('relu')(x)
 
@@ -163,42 +134,33 @@ def conv_block(input_tensor,
         kernel_size,
         strides=strides,
         padding='same',
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2b')(x)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
         name=bn_name_base + '2b')(x)
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
         filters3,
         (1, 1),
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2c')(x)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
         name=bn_name_base + '2c')(x)
 
     shortcut = layers.Conv2D(
         filters3,
         (1, 1),
         strides=strides,
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '1')(input_tensor)
     shortcut = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
         name=bn_name_base + '1')(shortcut)
 
     x = layers.add([x, shortcut])
@@ -208,16 +170,12 @@ def conv_block(input_tensor,
 
 
 def resnet50(num_classes,
-             batch_size=None,
-             use_l2_regularizer=True,
-             rescale_inputs=False):
+             batch_size=None):
     """Instantiates the ResNet50 architecture.
 
     Args:
       num_classes: `int` number of classes for image classification.
       batch_size: Size of the batches for each step.
-      use_l2_regularizer: whether to use L2 regularizer on Conv/Dense layer.
-      rescale_inputs: whether to rescale inputs from 0 to 1.
 
     Returns:
         A Keras model instance.
@@ -225,149 +183,53 @@ def resnet50(num_classes,
 
     input_shape = (224, 224, 3)
     img_input = layers.Input(shape=input_shape, batch_size=batch_size)
-
-    if rescale_inputs:
-        # Hub image modules expect inputs in the range [0, 1]. This rescales these
-        # inputs to the range expected by the trained model.
-        x = layers.Lambda(
-            lambda image: image * 255.0 - backend.constant(
-                imagenet_preprocessing.CHANNEL_MEANS,
-                shape=[1, 1, 3],
-                dtype=image.dtype),
-            name='rescale')(img_input)
-    else:
-        x = img_input
+    x = img_input
 
     if backend.image_data_format() == 'channels_first':
         x = layers.Permute((3, 1, 2))(x)
         bn_axis = 1
     else:  # channels_last
-        bn_axis = 3
+        bn_axis = -1
 
     x = layers.ZeroPadding2D(padding=(3, 3), name='conv1_pad')(x)
     x = layers.Conv2D(
         64, (7, 7),
         strides=(2, 2),
         padding='valid',
-        use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='conv1')(x)
     x = layers.BatchNormalization(
         axis=bn_axis,
-        momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
         name='bn_conv1')(x)
     x = layers.Activation('relu')(x)
     x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
 
-    x = conv_block(
-        x,
-        3, [64, 64, 256],
-        stage=2,
-        block='a',
-        strides=(1, 1),
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [64, 64, 256],
-        stage=2,
-        block='b',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [64, 64, 256],
-        stage=2,
-        block='c',
-        use_l2_regularizer=use_l2_regularizer)
+    x = conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
+    x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
+    x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')
 
-    x = conv_block(
-        x,
-        3, [128, 128, 512],
-        stage=3,
-        block='a',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [128, 128, 512],
-        stage=3,
-        block='b',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [128, 128, 512],
-        stage=3,
-        block='c',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [128, 128, 512],
-        stage=3,
-        block='d',
-        use_l2_regularizer=use_l2_regularizer)
+    x = conv_block(x, 3, [128, 128, 512], stage=3, block='a')
+    x = identity_block(x, 3, [128, 128, 512], stage=3, block='b')
+    x = identity_block(x, 3, [128, 128, 512], stage=3, block='c')
+    x = identity_block(x, 3, [128, 128, 512], stage=3, block='d')
 
-    x = conv_block(
-        x,
-        3, [256, 256, 1024],
-        stage=4,
-        block='a',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [256, 256, 1024],
-        stage=4,
-        block='b',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [256, 256, 1024],
-        stage=4,
-        block='c',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [256, 256, 1024],
-        stage=4,
-        block='d',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [256, 256, 1024],
-        stage=4,
-        block='e',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [256, 256, 1024],
-        stage=4,
-        block='f',
-        use_l2_regularizer=use_l2_regularizer)
+    x = conv_block(x, 3, [256, 256, 1024], stage=4, block='a')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='b')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='c')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='d')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='e')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='f')
 
-    x = conv_block(
-        x,
-        3, [512, 512, 2048],
-        stage=5,
-        block='a',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [512, 512, 2048],
-        stage=5,
-        block='b',
-        use_l2_regularizer=use_l2_regularizer)
-    x = identity_block(
-        x,
-        3, [512, 512, 2048],
-        stage=5,
-        block='c',
-        use_l2_regularizer=use_l2_regularizer)
+    x = conv_block(x, 3, [512, 512, 2048], stage=5, block='a')
+    x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
+    x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')
 
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dense(
         num_classes,
-        kernel_initializer=initializers.RandomNormal(stddev=0.01),
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
-        bias_regularizer=_gen_l2_regularizer(use_l2_regularizer),
+        kernel_initializer='he_normal',
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='fc1000')(x)
 
     # A softmax that is followed by the model loss must be done cannot be done

@@ -6,7 +6,6 @@ runtime:
   mode: 'train_and_eval'
   distribution_strategy: 'mirrored'
   num_gpus: 1
-  enable_xla: True
 train_dataset:
   name: 'imagenet2012'
   data_dir: null
@@ -35,8 +34,6 @@ validation_dataset:
   standardize: True
 model:
   model_name: 'resnet18'
-  model_params:
-    rescale_inputs: False
   optimizer:
     name: 'momentum'
     momentum: 0.9

@@ -27,8 +27,6 @@ class ResNet18ModelConfig(base_configs.ModelConfig):
     model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
         'num_classes': 1000,
         'batch_size': None,
-        'use_l2_regularizer': True,
-        'rescale_inputs': False,
     })
     loss: base_configs.LossConfig = base_configs.LossConfig(
         name='sparse_categorical_crossentropy')
@@ -55,8 +53,6 @@ class ResNet50ModelConfig(base_configs.ModelConfig):
     model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
         'num_classes': 1000,
         'batch_size': None,
-        'use_l2_regularizer': True,
-        'rescale_inputs': False,
     })
     loss: base_configs.LossConfig = base_configs.LossConfig(
         name='sparse_categorical_crossentropy')

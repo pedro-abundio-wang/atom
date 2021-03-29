@@ -34,8 +34,6 @@ validation_dataset:
   standardize: True
 model:
   model_name: 'resnet50'
-  model_params:
-    rescale_inputs: False
   optimizer:
     name: 'momentum'
     momentum: 0.9
