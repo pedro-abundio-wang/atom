@@ -3,6 +3,17 @@
 * [Classifier Trainer](#classifier-trainer), a framework that uses the Keras
 compile/fit methods for image classification models, including:
   * AlexNet
+  * ResNet18
+  * ResNet50
+  * ShuffleNet
+  * MobileNet-224
+  * SqueezeNets
+  * Wide ResNet50
+  * MobileNetV2
+  * InceptionV2
+  * ShuffleNetV2
+  * EfficientNet
+  * InceptionV3
 
 ### ImageNet preparation
 
