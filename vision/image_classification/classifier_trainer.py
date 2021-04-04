@@ -32,6 +32,11 @@ from vision.image_classification.resnet import common
 from vision.image_classification.alexnet import alexnet_model
 from vision.image_classification.resnet import resnet18_model
 from vision.image_classification.resnet import resnet50_model
+from vision.image_classification.inception import googlenet_model
+from vision.image_classification.resnet import resnet18v2_model
+from vision.image_classification.resnet import resnet50v2_model
+from vision.image_classification.vgg import vgg16_model
+from vision.image_classification.squeeze import squeeze_model
 
 
 def get_models() -> Mapping[str, tf.keras.Model]:
@@ -40,6 +45,11 @@ def get_models() -> Mapping[str, tf.keras.Model]:
         'alexnet': alexnet_model.alexnet,
         'resnet18': resnet18_model.resnet18,
         'resnet50': resnet50_model.resnet50,
+        'googlenet': googlenet_model.googlenet,
+        'resnet18v2': resnet18v2_model.resnet18v2,
+        'resnet50v2': resnet50v2_model.resnet50v2,
+        'vgg16': vgg16_model.vgg16,
+        'squeeze': squeeze_model.squeezenet,
     }
 
 

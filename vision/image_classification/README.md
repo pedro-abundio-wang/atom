@@ -2,18 +2,23 @@
 
 * [Classifier Trainer](#classifier-trainer), a framework that uses the Keras
 compile/fit methods for image classification models, including:
-  * AlexNet (loss: 3.1398 - top_5_accuracy: 0.7995 - accuracy: 0.5642)
-  * ResNet18
-  * ResNet50
-  * ShuffleNet
-  * MobileNet-224
-  * SqueezeNets
-  * Wide ResNet50
-  * MobileNetV2
-  * InceptionV2
-  * ShuffleNetV2
-  * EfficientNet
+  * AlexNet (loss: 3.1398 - top_5_accuracy: 0.7995 - accuracy: 0.5642 - 30min/epoch)
+  * ResNet18 (90min/epoch)
+  * ResNet50 (5h/epoch)
+  * GoogLeNet (20min/epoch)
+  * ResNet18V2 
+  * ResNet50V2 (4h/epoch)
   * InceptionV3
+  * InceptionV4
+  * Inception-ResNet
+  * Vgg16 (9h/epoch)
+  * WideResNet
+  * ResNeXt
+  * ShuffleNet
+  * SqueezeNets (20min/epoch)
+  * MobileNet
+  * EfficientNet
+  * Xception
 
 ### ImageNet preparation
 

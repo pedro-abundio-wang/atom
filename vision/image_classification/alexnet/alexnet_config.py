@@ -1,6 +1,6 @@
 # Lint as: python3
 # ==============================================================================
-"""Configuration definitions for ResNet losses, learning rates, and optimizers."""
+"""Configuration definitions for AlexNet losses, learning rates, and optimizers."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
