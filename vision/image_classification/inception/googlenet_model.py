@@ -236,7 +236,6 @@ def googlenet(num_classes,
         stage=3,
         block='b')
 
-    # stage3 pool
     x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
@@ -302,7 +301,6 @@ def googlenet(num_classes,
         stage=4,
         block='e')
 
-    # stage4 pool
     x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),

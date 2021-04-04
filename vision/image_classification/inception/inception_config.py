@@ -11,9 +11,8 @@ import dataclasses
 
 from vision.image_classification.configs import base_configs
 
-
 _LR_SCHEDULE = [    # (multiplier, epoch to start) tuples
-    (1.0, 5), (0.1, 30), (0.01, 60), (0.001, 80)
+    (0.1, 5), (0.01, 20), (0.001, 40), (0.0001, 60), (0.00001, 80)
 ]
 
 _LR_BOUNDARIES = list(p[1] for p in _LR_SCHEDULE[1:])
@@ -22,7 +21,7 @@ _LR_WARMUP_EPOCHS = _LR_SCHEDULE[0][1]
 
 
 @dataclasses.dataclass
-class GoogLeNetModelConfig(base_configs.ModelConfig):
+class GooglenetModelConfig(base_configs.ModelConfig):
     """Configuration for the GoogLeNet model."""
     name: str = 'GoogLeNet'
     num_classes: int = 1000
