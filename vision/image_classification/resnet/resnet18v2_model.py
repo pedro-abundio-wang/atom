@@ -56,12 +56,7 @@ def block(input_tensor,
             strides=stride,
             name=name + '_0_conv')(preact)
     else:
-        if stride > 1:
-            shortcut = layers.MaxPooling2D(
-                pool_size=1,
-                strides=stride)(input_tensor)
-        else:
-            shortcut = input_tensor
+        shortcut = input_tensor
     x = layers.ZeroPadding2D(
         padding=1,
         name=name + '_1_pad')(preact)
@@ -84,7 +79,7 @@ def block(input_tensor,
     x = layers.Conv2D(
         filters=filters,
         kernel_size=kernel_size,
-        strides=stride,
+        strides=1,
         use_bias=False,
         name=name + '_2_conv')(x)
 
@@ -107,10 +102,9 @@ def resnet_block(input_tensor, filters, size, stride=2, stage=None):
         Output tensor for the stacked blocks.
     """
     base_name = 'stage' + str(stage)
-    x = block(input_tensor, filters, conv_shortcut=True, name=base_name + '_block1')
-    for i in range(2, size):
-        x = block(x, filters, name=base_name + '_block' + str(i))
-    x = block(x, filters, stride=stride, name=base_name + '_block' + str(size))
+    x = block(input_tensor, filters, conv_shortcut=True, stride=stride, name=base_name + '_block_0')
+    for i in range(size - 1):
+        x = block(x, filters, name=base_name + '_block_%d' % (i + 1))
 
     return x
 
@@ -148,10 +142,10 @@ def resnet18v2(num_classes,
         name='conv1')(x)
     x = layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same')(x)
 
-    x = resnet_block(x, size=2, filters=64, stage=2)
+    x = resnet_block(x, size=2, filters=64, stage=2, stride=1)
     x = resnet_block(x, size=2, filters=128, stage=3)
     x = resnet_block(x, size=2, filters=256, stage=4)
-    x = resnet_block(x, size=2, filters=512, stage=5, stride=1)
+    x = resnet_block(x, size=2, filters=512, stage=5)
 
     x = layers.BatchNormalization(
         axis=bn_axis, name='post_bn')(x)

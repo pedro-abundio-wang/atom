@@ -6,7 +6,7 @@ compile/fit methods for image classification models, including:
   * ResNet18 (90min/epoch)
   * ResNet50 (5h/epoch)
   * GoogLeNet (20min/epoch)
-  * ResNet18V2 
+  * ResNet18V2 (80min/epoch)
   * ResNet50V2 (4h/epoch)
   * InceptionV3
   * InceptionV4
