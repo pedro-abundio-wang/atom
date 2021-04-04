@@ -22,20 +22,19 @@ def identity_block(input_tensor,
                    filters,
                    stage,
                    block):
+
     """The identity block is the block that has no conv layer at shortcut.
 
     Args:
       input_tensor: input tensor
       kernel_size: default 3, the kernel size of middle conv layer at main path
-      filters: list of integers, the filters of 3 conv layer at main path
+      filters: integer, filters of the bottleneck layer.
       stage: integer, current stage label, used for generating layer names
       block: 'a','b'..., current block label, used for generating layer names
 
     Returns:
       Output tensor for the block.
     """
-
-    filters1, filters2, filters3 = filters
 
     if backend.image_data_format() == 'channels_last':
         bn_axis = -1
@@ -46,8 +45,8 @@ def identity_block(input_tensor,
     bn_name_base = 'bn' + str(stage) + block + '_branch'
 
     x = layers.Conv2D(
-        filters1,
-        (1, 1),
+        filters=filters,
+        kernel_size=1,
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2a')(input_tensor)
@@ -57,8 +56,8 @@ def identity_block(input_tensor,
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
-        filters2,
-        kernel_size,
+        filters=filters,
+        kernel_size=kernel_size,
         padding='same',
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
@@ -69,8 +68,8 @@ def identity_block(input_tensor,
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
-        filters3,
-        (1, 1),
+        filters=4 * filters,
+        kernel_size=1,
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2c')(x)
@@ -89,7 +88,8 @@ def conv_block(input_tensor,
                filters,
                stage,
                block,
-               strides=(2, 2)):
+               strides=2):
+
     """A block that has a conv layer at shortcut.
 
     Note that from stage 3,
@@ -99,7 +99,7 @@ def conv_block(input_tensor,
     Args:
       input_tensor: input tensor
       kernel_size: default 3, the kernel size of middle conv layer at main path
-      filters: list of integers, the filters of 3 conv layer at main path
+      filters: integer, filters of the bottleneck layer.
       stage: integer, current stage label, used for generating layer names
       block: 'a','b'..., current block label, used for generating layer names
       strides: Strides for the second conv layer in the block.
@@ -107,8 +107,6 @@ def conv_block(input_tensor,
     Returns:
       Output tensor for the block.
     """
-
-    filters1, filters2, filters3 = filters
 
     if backend.image_data_format() == 'channels_last':
         bn_axis = -1
@@ -119,8 +117,8 @@ def conv_block(input_tensor,
     bn_name_base = 'bn' + str(stage) + block + '_branch'
 
     x = layers.Conv2D(
-        filters1,
-        (1, 1),
+        filters=filters,
+        kernel_size=1,
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2a')(input_tensor)
@@ -130,8 +128,8 @@ def conv_block(input_tensor,
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
-        filters2,
-        kernel_size,
+        filters=filters,
+        kernel_size=kernel_size,
         strides=strides,
         padding='same',
         kernel_initializer='he_normal',
@@ -143,8 +141,8 @@ def conv_block(input_tensor,
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
-        filters3,
-        (1, 1),
+        filters=4 * filters,
+        kernel_size=1,
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=conv_name_base + '2c')(x)
@@ -153,8 +151,8 @@ def conv_block(input_tensor,
         name=bn_name_base + '2c')(x)
 
     shortcut = layers.Conv2D(
-        filters3,
-        (1, 1),
+        filters=4 * filters,
+        kernel_size=1,
         strides=strides,
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
@@ -166,6 +164,33 @@ def conv_block(input_tensor,
     x = layers.add([x, shortcut])
     x = layers.Activation('relu')(x)
 
+    return x
+
+
+def resnet_block(input_tensor,
+                 size,
+                 kernel_size,
+                 filters,
+                 stage,
+                 conv_strides=(2, 2)):
+    """A block which applies conv followed by multiple identity blocks.
+
+    Arguments:
+      input_tensor: input tensor
+      size: integer, number of constituent conv/identity building blocks.
+        A conv block is applied once, followed by (size - 1) identity blocks.
+      kernel_size: default (3, 3), the kernel size of middle conv layer at main path
+      filters: integer, filters of the bottleneck layer.
+      stage: integer, current stage label, used for generating layer names
+      conv_strides: Strides for the first conv layer in the block.
+
+    Returns:
+      Output tensor after applying conv and identity blocks.
+    """
+
+    x = conv_block(input_tensor, kernel_size, filters, stage, 'block_0', conv_strides)
+    for i in range(size - 1):
+        x = identity_block(x, kernel_size, filters, stage, 'block_%d' % (i + 1))
     return x
 
 
@@ -205,25 +230,10 @@ def resnet50(num_classes,
     x = layers.Activation('relu')(x)
     x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
 
-    x = conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
-    x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
-    x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')
-
-    x = conv_block(x, 3, [128, 128, 512], stage=3, block='a')
-    x = identity_block(x, 3, [128, 128, 512], stage=3, block='b')
-    x = identity_block(x, 3, [128, 128, 512], stage=3, block='c')
-    x = identity_block(x, 3, [128, 128, 512], stage=3, block='d')
-
-    x = conv_block(x, 3, [256, 256, 1024], stage=4, block='a')
-    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='b')
-    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='c')
-    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='d')
-    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='e')
-    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='f')
-
-    x = conv_block(x, 3, [512, 512, 2048], stage=5, block='a')
-    x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
-    x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')
+    x = resnet_block(x, size=3, kernel_size=3, filters=64, stage=2, conv_strides=(1, 1))
+    x = resnet_block(x, size=4, kernel_size=3, filters=128, stage=3)
+    x = resnet_block(x, size=6, kernel_size=3, filters=256, stage=4)
+    x = resnet_block(x, size=3, kernel_size=3, filters=512, stage=5)
 
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dense(

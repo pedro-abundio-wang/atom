@@ -27,15 +27,15 @@ def identity_block(input_tensor,
 
     Arguments:
       input_tensor: input tensor
-      kernel_size: default (3, 3), the kernel size of middle conv layer at main path
-      filters: list of integers, the filters of 2 conv layer at main path
+      kernel_size: default 3, the kernel size of middle conv layer at main path
+      filters: integer, filters of the layer.
       stage: integer, current stage label, used for generating layer names
       block: current block label, used for generating layer names
 
     Returns:
       Output tensor for the block.
     """
-    filters1, filters2 = filters
+
     if backend.image_data_format() == 'channels_last':
         bn_axis = -1
     else:
@@ -44,9 +44,9 @@ def identity_block(input_tensor,
     bn_name_base = 'bn' + str(stage) + block + '_branch'
 
     x = layers.Conv2D(
-        filters=filters1,
+        filters=filters,
         kernel_size=kernel_size,
-        strides=(1, 1),
+        strides=1,
         padding='same',
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
@@ -57,9 +57,9 @@ def identity_block(input_tensor,
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
-        filters=filters2,
+        filters=filters,
         kernel_size=kernel_size,
-        strides=(1, 1),
+        strides=1,
         padding='same',
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
@@ -79,7 +79,7 @@ def conv_block(input_tensor,
                filters,
                stage,
                block,
-               strides=(2, 2)):
+               strides=2):
 
     """A block that has a conv layer at shortcut.
 
@@ -89,8 +89,8 @@ def conv_block(input_tensor,
 
     Arguments:
       input_tensor: input tensor
-      kernel_size: default (3, 3), the kernel size of middle conv layer at main path
-      filters: list of integers, the filters of 3 conv layer at main path
+      kernel_size: default 3, the kernel size of middle conv layer at main path
+      filters: integer, filters of the layer.
       stage: integer, current stage label, used for generating layer names
       block: current block label, used for generating layer names
       strides: Strides for the first conv layer in the block.
@@ -98,7 +98,7 @@ def conv_block(input_tensor,
     Returns:
       Output tensor for the block.
     """
-    filters1, filters2 = filters
+
     if backend.image_data_format() == 'channels_last':
         bn_axis = -1
     else:
@@ -107,7 +107,7 @@ def conv_block(input_tensor,
     bn_name_base = 'bn' + str(stage) + block + '_branch'
 
     x = layers.Conv2D(
-        filters=filters1,
+        filters=filters,
         kernel_size=kernel_size,
         strides=strides,
         padding='same',
@@ -120,9 +120,9 @@ def conv_block(input_tensor,
     x = layers.Activation('relu')(x)
 
     x = layers.Conv2D(
-        filters=filters2,
+        filters=filters,
         kernel_size=kernel_size,
-        strides=(1, 1),
+        strides=1,
         padding='same',
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
@@ -132,8 +132,8 @@ def conv_block(input_tensor,
         name=bn_name_base + '2b')(x)
 
     shortcut = layers.Conv2D(
-        filters=filters2,
-        kernel_size=(1, 1),
+        filters=filters,
+        kernel_size=1,
         strides=strides,
         kernel_initializer='he_normal',
         kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
@@ -153,15 +153,15 @@ def resnet_block(input_tensor,
                  kernel_size,
                  filters,
                  stage,
-                 conv_strides=(2, 2)):
+                 conv_strides=2):
     """A block which applies conv followed by multiple identity blocks.
 
     Arguments:
       input_tensor: input tensor
       size: integer, number of constituent conv/identity building blocks.
         A conv block is applied once, followed by (size - 1) identity blocks.
-      kernel_size: default (3, 3), the kernel size of middle conv layer at main path
-      filters: list of integers, the filters of 2 conv layer at main path
+      kernel_size: default 3, the kernel size of middle conv layer at main path
+      filters: integer, filters of the layer.
       stage: integer, current stage label, used for generating layer names
       conv_strides: Strides for the first conv layer in the block.
 
@@ -169,12 +169,9 @@ def resnet_block(input_tensor,
       Output tensor after applying conv and identity blocks.
     """
 
-    x = conv_block(input_tensor, kernel_size, filters,
-                   stage, 'block_0', conv_strides)
-
+    x = conv_block(input_tensor, kernel_size, filters, stage, 'block_0', conv_strides)
     for i in range(size - 1):
-        x = identity_block(x, kernel_size, filters,
-                           stage, 'block_%d' % (i + 1))
+        x = identity_block(x, kernel_size, filters, stage, 'block_%d' % (i + 1))
     return x
 
 
@@ -216,17 +213,10 @@ def resnet18(num_classes,
     x = layers.Activation('relu')(x)
     x = layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same')(x)
 
-    x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[64, 64],
-                     stage=2, conv_strides=(1, 1))
-
-    x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[128, 128],
-                     stage=3, conv_strides=(2, 2))
-
-    x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[256, 256],
-                     stage=4, conv_strides=(2, 2))
-
-    x = resnet_block(x, size=2, kernel_size=(3, 3), filters=[512, 512],
-                     stage=5, conv_strides=(2, 2))
+    x = resnet_block(x, size=2, kernel_size=3, filters=64, stage=2, conv_strides=1)
+    x = resnet_block(x, size=2, kernel_size=3, filters=128, stage=3)
+    x = resnet_block(x, size=2, kernel_size=3, filters=256, stage=4)
+    x = resnet_block(x, size=2, kernel_size=3, filters=512, stage=5)
 
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dense(

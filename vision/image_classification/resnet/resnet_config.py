@@ -11,12 +11,12 @@ import dataclasses
 
 from vision.image_classification.configs import base_configs
 
-_RESNET_LR_SCHEDULE = [  # (multiplier, epoch to start) tuples
-    (0.2, 5), (0.1, 30), (0.01, 60), (0.001, 80)
+_LR_SCHEDULE = [  # (multiplier, epoch to start) tuples
+    (0.2, 5), (0.1, 20), (0.01, 40), (0.001, 60), (0.0001, 80)
 ]
-_RESNET_LR_BOUNDARIES = list(p[1] for p in _RESNET_LR_SCHEDULE[1:])
-_RESNET_LR_MULTIPLIERS = list(p[0] for p in _RESNET_LR_SCHEDULE)
-_RESNET_LR_WARMUP_EPOCHS = _RESNET_LR_SCHEDULE[0][1]
+_LR_BOUNDARIES = list(p[1] for p in _LR_SCHEDULE[1:])
+_LR_MULTIPLIERS = list(p[0] for p in _LR_SCHEDULE)
+_LR_WARMUP_EPOCHS = _LR_SCHEDULE[0][1]
 
 
 @dataclasses.dataclass
@@ -40,9 +40,9 @@ class ResNet18ModelConfig(base_configs.ModelConfig):
         base_configs.LearningRateConfig(
             name='piecewise_constant_with_warmup',
             examples_per_epoch=1281167,
-            warmup_epochs=_RESNET_LR_WARMUP_EPOCHS,
-            boundaries=_RESNET_LR_BOUNDARIES,
-            multipliers=_RESNET_LR_MULTIPLIERS))
+            warmup_epochs=_LR_WARMUP_EPOCHS,
+            boundaries=_LR_BOUNDARIES,
+            multipliers=_LR_MULTIPLIERS))
 
 
 @dataclasses.dataclass
@@ -66,6 +66,58 @@ class ResNet50ModelConfig(base_configs.ModelConfig):
         base_configs.LearningRateConfig(
             name='piecewise_constant_with_warmup',
             examples_per_epoch=1281167,
-            warmup_epochs=_RESNET_LR_WARMUP_EPOCHS,
-            boundaries=_RESNET_LR_BOUNDARIES,
-            multipliers=_RESNET_LR_MULTIPLIERS))
+            warmup_epochs=_LR_WARMUP_EPOCHS,
+            boundaries=_LR_BOUNDARIES,
+            multipliers=_LR_MULTIPLIERS))
+
+
+@dataclasses.dataclass
+class ResNet18V2ModelConfig(base_configs.ModelConfig):
+    """Configuration for the ResNet18V2 model."""
+    name: str = 'ResNet18V2'
+    num_classes: int = 1000
+    model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
+        'num_classes': 1000,
+        'batch_size': None,
+    })
+    loss: base_configs.LossConfig = base_configs.LossConfig(
+        name='sparse_categorical_crossentropy')
+    optimizer: base_configs.OptimizerConfig = base_configs.OptimizerConfig(
+        name='momentum',
+        decay=0.9,
+        epsilon=0.001,
+        momentum=0.9,
+        moving_average_decay=None)
+    learning_rate: base_configs.LearningRateConfig = (
+        base_configs.LearningRateConfig(
+            name='piecewise_constant_with_warmup',
+            examples_per_epoch=1281167,
+            warmup_epochs=_LR_WARMUP_EPOCHS,
+            boundaries=_LR_BOUNDARIES,
+            multipliers=_LR_MULTIPLIERS))
+
+
+@dataclasses.dataclass
+class ResNet50V2ModelConfig(base_configs.ModelConfig):
+    """Configuration for the ResNet50V2 model."""
+    name: str = 'ResNet50V2'
+    num_classes: int = 1000
+    model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
+        'num_classes': 1000,
+        'batch_size': None,
+    })
+    loss: base_configs.LossConfig = base_configs.LossConfig(
+        name='sparse_categorical_crossentropy')
+    optimizer: base_configs.OptimizerConfig = base_configs.OptimizerConfig(
+        name='momentum',
+        decay=0.9,
+        epsilon=0.001,
+        momentum=0.9,
+        moving_average_decay=None)
+    learning_rate: base_configs.LearningRateConfig = (
+        base_configs.LearningRateConfig(
+            name='piecewise_constant_with_warmup',
+            examples_per_epoch=1281167,
+            warmup_epochs=_LR_WARMUP_EPOCHS,
+            boundaries=_LR_BOUNDARIES,
+            multipliers=_LR_MULTIPLIERS))
