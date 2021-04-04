@@ -102,7 +102,7 @@ def squeezenet(num_classes,
     x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
-        padding='valid')(x)
+        padding='same')(x)
 
     x = fire(x, name='fire2', s1x1=16, e1x1=64, e3x3=64)
     x = fire(x, name='fire3', s1x1=16, e1x1=64, e3x3=64)
@@ -110,7 +110,8 @@ def squeezenet(num_classes,
 
     x = layers.MaxPool2D(
         pool_size=(3, 3),
-        strides=(2, 2))(x)
+        strides=(2, 2),
+        padding='same')(x)
 
     x = fire(x, name='fire5', s1x1=32, e1x1=128, e3x3=128)
     x = fire(x, name='fire6', s1x1=48, e1x1=192, e3x3=192)
@@ -119,7 +120,8 @@ def squeezenet(num_classes,
 
     x = layers.MaxPool2D(
         pool_size=(3, 3),
-        strides=(2, 2))(x)
+        strides=(2, 2),
+        padding='same')(x)
 
     x = fire(x, name='fire9', s1x1=64, e1x1=256, e3x3=256)
 
