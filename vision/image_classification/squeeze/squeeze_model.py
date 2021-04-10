@@ -22,7 +22,7 @@ def squeeze(input_tensor,
         filters=s1x1,
         kernel_size=(1, 1),
         strides=(1, 1),
-        padding='same',
+        padding='valid',
         activation='relu',
         kernel_initializer='he_normal',
         name=base_name + '_squeeze')(input_tensor)
@@ -44,7 +44,7 @@ def expand(input_tensor,
         filters=e1x1,
         kernel_size=(1, 1),
         strides=(1, 1),
-        padding='same',
+        padding='valid',
         activation='relu',
         kernel_initializer='he_normal',
         name=base_name + '_expand1x1')(input_tensor)
@@ -87,9 +87,15 @@ def squeezenet(num_classes,
         A Keras model instance.
     """
 
-    input_shape = (224, 224, 3)
+    input_shape = (227, 227, 3)
     img_input = layers.Input(shape=input_shape, batch_size=batch_size)
     x = img_input
+
+    if backend.image_data_format() == 'channels_first':
+        x = layers.Permute((3, 1, 2))(x)
+        bn_axis = 1
+    else:  # channels_last
+        bn_axis = -1
 
     x = layers.Conv2D(
         filters=96,
@@ -97,12 +103,12 @@ def squeezenet(num_classes,
         strides=(2, 2),
         activation='relu',
         kernel_initializer='he_normal',
-        padding='same',
+        padding='valid',
         name='conv1')(x)
     x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
-        padding='same')(x)
+        padding='valid')(x)
 
     x = fire(x, name='fire2', s1x1=16, e1x1=64, e3x3=64)
     x = fire(x, name='fire3', s1x1=16, e1x1=64, e3x3=64)
@@ -111,7 +117,7 @@ def squeezenet(num_classes,
     x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
-        padding='same')(x)
+        padding='valid')(x)
 
     x = fire(x, name='fire5', s1x1=32, e1x1=128, e3x3=128)
     x = fire(x, name='fire6', s1x1=48, e1x1=192, e3x3=192)
@@ -121,7 +127,7 @@ def squeezenet(num_classes,
     x = layers.MaxPool2D(
         pool_size=(3, 3),
         strides=(2, 2),
-        padding='same')(x)
+        padding='valid')(x)
 
     x = fire(x, name='fire9', s1x1=64, e1x1=256, e3x3=256)
 
@@ -132,7 +138,7 @@ def squeezenet(num_classes,
         strides=(1, 1),
         activation='relu',
         kernel_initializer='he_normal',
-        padding='same',
+        padding='valid',
         name='conv10')(x)
 
     x = layers.GlobalAveragePooling2D()(x)
