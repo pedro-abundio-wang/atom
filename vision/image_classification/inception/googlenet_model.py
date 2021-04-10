@@ -18,64 +18,6 @@ from tensorflow.keras import layers
 L2_WEIGHT_DECAY = 1e-4
 
 
-def stem_block(input_tensor):
-
-    if backend.image_data_format() == 'channels_last':
-        channel_axis = -1
-    else:
-        channel_axis = 1
-
-    # stage1
-    x = layers.Conv2D(
-        filters=64,
-        kernel_size=(7, 7),
-        strides=(2, 2),
-        padding='same',
-        kernel_initializer='he_normal',
-        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
-        name='stage1_conv7x7')(input_tensor)
-    x = layers.BatchNormalization(
-        axis=channel_axis,
-        name='stage1_bn7x7')(x)
-    x = layers.Activation('relu')(x)
-    x = layers.MaxPool2D(
-        pool_size=(3, 3),
-        strides=(2, 2),
-        padding='same')(x)
-
-    # stage2
-    x = layers.Conv2D(
-        filters=64,
-        kernel_size=(1, 1),
-        strides=(1, 1),
-        padding='same',
-        kernel_initializer='he_normal',
-        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
-        name='stage2_conv3x3_reduce')(x)
-    x = layers.BatchNormalization(
-        axis=channel_axis,
-        name='stage2_bn3x3_reduce')(x)
-    x = layers.Activation('relu')(x)
-    x = layers.Conv2D(
-        filters=192,
-        kernel_size=(3, 3),
-        strides=(1, 1),
-        padding='same',
-        kernel_initializer='he_normal',
-        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
-        name='stage2_conv3x3')(x)
-    x = layers.BatchNormalization(
-        axis=channel_axis,
-        name='stage2_bn3x3')(x)
-    x = layers.Activation('relu')(x)
-    x = layers.MaxPool2D(
-        pool_size=(3, 3),
-        strides=(2, 2),
-        padding='same')(x)
-
-    return x
-
-
 def inception_block(input_tensor,
                     num1x1,
                     num3x3_reduce,
@@ -209,8 +151,59 @@ def googlenet(num_classes,
     img_input = layers.Input(shape=input_shape, batch_size=batch_size)
     x = img_input
 
-    # stem stage
-    x = stem_block(input_tensor=x)
+    if backend.image_data_format() == 'channels_first':
+        x = layers.Permute((3, 1, 2))(x)
+        bn_axis = 1
+    else:  # channels_last
+        bn_axis = -1
+
+    # stage1
+    x = layers.Conv2D(
+        filters=64,
+        kernel_size=(7, 7),
+        strides=(2, 2),
+        padding='same',
+        kernel_initializer='he_normal',
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
+        name='stage1_conv7x7')(x)
+    x = layers.BatchNormalization(
+        axis=bn_axis,
+        name='stage1_bn7x7')(x)
+    x = layers.Activation('relu')(x)
+    x = layers.MaxPool2D(
+        pool_size=(3, 3),
+        strides=(2, 2),
+        padding='same')(x)
+
+    # stage2
+    x = layers.Conv2D(
+        filters=64,
+        kernel_size=(1, 1),
+        strides=(1, 1),
+        padding='same',
+        kernel_initializer='he_normal',
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
+        name='stage2_conv3x3_reduce')(x)
+    x = layers.BatchNormalization(
+        axis=bn_axis,
+        name='stage2_bn3x3_reduce')(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Conv2D(
+        filters=192,
+        kernel_size=(3, 3),
+        strides=(1, 1),
+        padding='same',
+        kernel_initializer='he_normal',
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
+        name='stage2_conv3x3')(x)
+    x = layers.BatchNormalization(
+        axis=bn_axis,
+        name='stage2_bn3x3')(x)
+    x = layers.Activation('relu')(x)
+    x = layers.MaxPool2D(
+        pool_size=(3, 3),
+        strides=(2, 2),
+        padding='same')(x)
 
     # stage3a
     x = inception_block(
@@ -345,14 +338,3 @@ def googlenet(num_classes,
 
     # Create model.
     return models.Model(img_input, x, name='googlenet')
-
-
-
-
-
-
-
-
-
-
-
