@@ -5,8 +5,16 @@ Related papers/blogs:
 
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import tensorflow as tf
-from tensorflow import keras
+
+from tensorflow.keras import backend
+from tensorflow.keras import models
+from tensorflow.keras import regularizers
+from tensorflow.keras import layers
 
 L2_WEIGHT_DECAY = 1e-4
 PRELU_ALPHA = 0.25
@@ -18,31 +26,31 @@ def initial_block(input_tensor):
     :return: initial block tensor
     """
 
-    if keras.backend.image_data_format() == 'channels_last':
+    if backend.image_data_format() == 'channels_last':
         channel_axis = 3
     else:
         channel_axis = 1
 
-    branch_conv = keras.layers.Conv2D(
+    branch_conv = layers.Conv2D(
         filters=13,
         kernel_size=(3, 3),
         strides=(2, 2),
         padding='same',
         use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='initial_block_conv')(input_tensor)
-    branch_conv = keras.layers.BatchNormalization(
+    branch_conv = layers.BatchNormalization(
         axis=channel_axis,
         name='initial_block_bn')(branch_conv)
 
-    branch_pool = keras.layers.MaxPool2D(
+    branch_pool = layers.MaxPool2D(
         pool_size=(2, 2),
         strides=(2, 2),
         padding='valid')(input_tensor)
 
-    x = keras.layers.Concatenate(axis=channel_axis)([branch_conv, branch_pool])
-    x = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(x)
+    x = layers.Concatenate(axis=channel_axis)([branch_conv, branch_pool])
+    x = layers.PReLU(alpha_initializer=PRELU_ALPHA)(x)
 
     return x
 
@@ -67,7 +75,7 @@ def bottleneck(input_tensor,
     :return: bottleneck block tensor
     """
 
-    if keras.backend.image_data_format() == 'channels_last':
+    if backend.image_data_format() == 'channels_last':
         channel_axis = -1
     else:
         channel_axis = 1
@@ -75,21 +83,21 @@ def bottleneck(input_tensor,
     name_base = 'stage' + str(stage) + '_' + 'block' + str(block)
     reduced_depth = in_filters // projection_ratio
 
-    shortcut = keras.layers.Conv2D(
+    shortcut = layers.Conv2D(
         filters=reduced_depth,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='valid',
         use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv_reduce')(input_tensor)
-    shortcut = keras.layers.BatchNormalization(
+    shortcut = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn_reduce')(shortcut)
-    shortcut = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
+    shortcut = layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
 
-    shortcut = keras.layers.Conv2D(
+    shortcut = layers.Conv2D(
         filters=reduced_depth,
         kernel_size=(3, 3),
         strides=(1, 1),
@@ -97,29 +105,29 @@ def bottleneck(input_tensor,
         dilation_rate=dilation_rate,
         use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv')(shortcut)
-    shortcut = keras.layers.BatchNormalization(
+    shortcut = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn')(shortcut)
-    shortcut = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
+    shortcut = layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
 
-    shortcut = keras.layers.Conv2D(
+    shortcut = layers.Conv2D(
         filters=out_filters,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
         use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv_expansion')(shortcut)
-    shortcut = keras.layers.BatchNormalization(
+    shortcut = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn_expansion')(shortcut)
-    shortcut = keras.layers.SpatialDropout2D(rate=drop_rate)(shortcut)
+    shortcut = layers.SpatialDropout2D(rate=drop_rate)(shortcut)
 
-    x = keras.layers.add([input_tensor, shortcut])
-    x = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(x)
+    x = layers.add([input_tensor, shortcut])
+    x = layers.PReLU(alpha_initializer=PRELU_ALPHA)(x)
 
     return x
 
@@ -142,7 +150,7 @@ def downsampling(input_tensor,
     :return: downsampling bottleneck block tensor
     """
 
-    if keras.backend.image_data_format() == 'channels_last':
+    if backend.image_data_format() == 'channels_last':
         channel_axis = -1
     else:
         channel_axis = 1
@@ -150,57 +158,57 @@ def downsampling(input_tensor,
     name_base = 'stage' + str(stage) + '_' + 'block' + str(block)
     reduced_depth = in_filters // projection_ratio
 
-    x = keras.layers.MaxPool2D(
+    x = layers.MaxPool2D(
         pool_size=(2, 2),
         strides=(2, 2),
         padding='same')(input_tensor)
     zero_padding = tf.zeros_like(x)
-    x = keras.layers.Concatenate(axis=channel_axis)([x, zero_padding])
+    x = layers.Concatenate(axis=channel_axis)([x, zero_padding])
 
-    shortcut = keras.layers.Conv2D(
+    shortcut = layers.Conv2D(
         filters=reduced_depth,
         kernel_size=(2, 2),
         strides=(2, 2),
         padding='valid',
         use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv_reduce')(input_tensor)
-    shortcut = keras.layers.BatchNormalization(
+    shortcut = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn_reduce')(shortcut)
-    shortcut = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
+    shortcut = layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
 
-    shortcut = keras.layers.Conv2D(
+    shortcut = layers.Conv2D(
         filters=reduced_depth,
         kernel_size=(3, 3),
         strides=(1, 1),
         padding='same',
         use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv')(shortcut)
-    shortcut = keras.layers.BatchNormalization(
+    shortcut = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn')(shortcut)
-    shortcut = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
+    shortcut = layers.PReLU(alpha_initializer=PRELU_ALPHA)(shortcut)
 
-    shortcut = keras.layers.Conv2D(
+    shortcut = layers.Conv2D(
         filters=out_filters,
         kernel_size=(1, 1),
         strides=(1, 1),
         padding='same',
         use_bias=False,
         kernel_initializer='he_normal',
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name=name_base + '_conv_expansion')(shortcut)
-    shortcut = keras.layers.BatchNormalization(
+    shortcut = layers.BatchNormalization(
         axis=channel_axis,
         name=name_base + '_bn_expansion')(shortcut)
-    shortcut = keras.layers.SpatialDropout2D(rate=drop_rate)(shortcut)
+    shortcut = layers.SpatialDropout2D(rate=drop_rate)(shortcut)
 
-    x = keras.layers.add([x, shortcut])
-    x = keras.layers.PReLU(alpha_initializer=PRELU_ALPHA)(x)
+    x = layers.add([x, shortcut])
+    x = layers.PReLU(alpha_initializer=PRELU_ALPHA)(x)
 
     return x
 
@@ -234,7 +242,7 @@ def enet_encoder(input_tensor):
     x = bottleneck(x, in_filters=1024, out_filters=1024, stage=4, block=1)
     x = bottleneck(x, in_filters=1024, out_filters=1024, stage=4, block=2, dilation_rate=(8, 8))
 
-    x = keras.layers.GlobalAveragePooling2D()(x)
+    x = layers.GlobalAveragePooling2D()(x)
 
     return x, masks
 
@@ -252,25 +260,31 @@ def enet(num_classes,
     """
 
     input_shape = (224, 224, 3)
-    img_input = keras.layers.Input(shape=input_shape, batch_size=batch_size)
+    img_input = layers.Input(shape=input_shape, batch_size=batch_size)
     x = img_input
+
+    if backend.image_data_format() == 'channels_first':
+        x = layers.Permute((3, 1, 2))(x)
+        bn_axis = 1
+    else:  # channels_last
+        bn_axis = -1
 
     x = initial_block(x)
     x, masks = enet_encoder(x)
 
     # classifier
-    x = keras.layers.Dense(
+    x = layers.Dense(
         units=num_classes,
-        kernel_initializer=keras.initializers.RandomNormal(stddev=0.01),
-        kernel_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
-        bias_regularizer=keras.regularizers.l2(L2_WEIGHT_DECAY),
+        kernel_initializer='he_normal',
+        kernel_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
+        bias_regularizer=regularizers.l2(L2_WEIGHT_DECAY),
         name='fc1000')(x)
 
     # A softmax that is followed by the model loss must be done
     # cannot be done in float16 due to numeric issues.
     # So we pass dtype=float32.
-    x = keras.layers.Activation('softmax', dtype='float32')(x)
+    x = layers.Activation('softmax', dtype='float32')(x)
 
     # Create model.
-    return keras.models.Model(img_input, x, name='enet_v12')
+    return models.Model(img_input, x, name='enet_v12')
 

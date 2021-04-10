@@ -378,6 +378,8 @@ def train_and_eval(
             'validation_freq': params.evaluation.epochs_between_evals,
         }
 
+    model.summary()
+
     history = model.fit(
         train_dataset,
         epochs=train_epochs,
