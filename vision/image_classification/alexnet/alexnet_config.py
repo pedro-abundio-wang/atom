@@ -13,7 +13,7 @@ from vision.image_classification.configs import base_configs
 
 
 _LR_SCHEDULE = [    # (multiplier, epoch to start) tuples
-    (0.1, 5), (0.01, 20), (0.001, 40)
+    (0.2, 5), (0.2e-1, 20), (0.2e-2, 40), (0.2e-3, 60), (0.2e-4, 80)
 ]
 
 _LR_BOUNDARIES = list(p[1] for p in _LR_SCHEDULE[1:])

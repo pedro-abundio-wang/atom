@@ -27,7 +27,7 @@ from vision.image_classification import dataset_factory
 from vision.image_classification import optimizer_factory
 from vision.image_classification.configs import base_configs
 from vision.image_classification.configs import configs
-from vision.image_classification.resnet import common
+from benchmark.models import resnet_common
 
 from vision.image_classification.alexnet import alexnet_model
 from vision.image_classification.resnet import resnet18_model
@@ -394,9 +394,9 @@ def train_and_eval(
             validation_dataset, steps=validation_steps, verbose=2)
 
     # TODO(dankondratyuk): eval and save final test accuracy
-    stats = common.build_stats(history,
-                               validation_output,
-                               callbacks)
+    stats = resnet_common.build_stats(history,
+                                      validation_output,
+                                      callbacks)
     return stats
 
 
