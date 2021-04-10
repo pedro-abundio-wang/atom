@@ -51,7 +51,6 @@ def vgg_block(input_tensor,
     return x
 
 
-
 def vgg16(num_classes,
           batch_size=None):
 
