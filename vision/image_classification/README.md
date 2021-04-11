@@ -5,7 +5,7 @@ compile/fit methods for image classification models, including:
   * AlexNet
     * loss: 3.1398 - top_5_accuracy: 0.7995 - accuracy: 0.5642 - 30min/epoch
     * Total params: 62,416,616
-    * Trainable params: 62,397,480 
+    * Trainable params: 62,397,480
     * Non-trainable params: 19,136
   * ResNet18 
     * 80min/epoch

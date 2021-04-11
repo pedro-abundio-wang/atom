@@ -19,7 +19,7 @@ L2_WEIGHT_DECAY = 5e-4
 
 def alexnet(num_classes,
             batch_size=None):
-    """Instantiates the AlexNet architecture.
+    """Instantiates the architecture.
 
     Args:
         num_classes: `int` number of classes for image classification.

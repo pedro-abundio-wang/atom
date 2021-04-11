@@ -4,7 +4,9 @@
 runtime:
   model_dir: null
   mode: 'train_and_eval'
-  distribution_strategy: 'one_device'
+  distribution_strategy: 'off'
+  enable_xla: True
+  run_eagerly: False
   num_gpus: 1
 train_dataset:
   name: 'imagenet2012'
@@ -14,7 +16,7 @@ train_dataset:
   image_size: 227
   num_classes: 1000
   num_examples: 1281167
-  batch_size: 128
+  batch_size: 256
   use_per_replica_batch_size: True
   dtype: 'float32'
   mean_subtract: True
@@ -27,7 +29,7 @@ validation_dataset:
   image_size: 227
   num_classes: 1000
   num_examples: 50000
-  batch_size: 128
+  batch_size: 256
   use_per_replica_batch_size: True
   dtype: 'float32'
   mean_subtract: True
