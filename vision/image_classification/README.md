@@ -1,6 +1,6 @@
 # Image Classification
 
-* [Classifier Trainer](#classifier-trainer), a framework that uses the Keras
+* [Classifier Trainer](#classifier-trainer) a framework that uses the Keras
 compile/fit methods for image classification models, including:
   * AlexNet
     * loss: 3.1398 - top_5_accuracy: 0.7995 - accuracy: 0.5642 - 30min/epoch
