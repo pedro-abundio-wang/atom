@@ -35,21 +35,24 @@ def load_model():
 
 def vis_img_filters(model):
 
-    img_filters = [weight
-                   for weight in model.weights
-                   if 'kernel' in weight.name][0]
+    # 1st conv filter weight
+    img_filter_weight = [weight
+                         for weight in model.weights
+                         if 'kernel' in weight.name][0].numpy()
+    # img_filter_size is 64
+    img_filter_size = img_filter_weight.shape[-1]
+    grid_size = int(np.ceil(np.sqrt(img_filter_size)))
 
-    f, axarr = plt.subplots(8, 8)
+    w_min, w_max = np.min(img_filter_weight), np.max(img_filter_weight)
 
-    for x in range(0, 8):
-        kernel = img_filters[:, :, :, x].numpy()
-        # Clip to [0, 1]
-        kernel += 0.5
-        kernel = np.clip(kernel, 0, 1)
-        axarr[0, x].imshow(kernel, cmap='inferno')
-        axarr[0, x].grid(False)
+    for i in range(img_filter_size):
+        plt.subplot(grid_size, grid_size, i + 1)
+        # Rescale the weights to be between 0 and 255
+        wimg = 255.0 * (img_filter_weight[:, :, :, i].squeeze() - w_min) / (w_max - w_min)
+        plt.imshow(wimg.astype('uint8'))
+        plt.axis('off')
 
-    plt.show()
+    plt.savefig('img_filter_weight.png')
 
 
 def vis_feature_maps(model,
