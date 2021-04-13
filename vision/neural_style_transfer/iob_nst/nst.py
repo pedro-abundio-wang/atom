@@ -39,27 +39,33 @@ def vis_img_filters(model):
     img_filter_weight = [weight
                          for weight in model.weights
                          if 'kernel' in weight.name][0].numpy()
-    # img_filter_size is 64
-    img_filter_size = img_filter_weight.shape[-1]
-    grid_size = int(np.ceil(np.sqrt(img_filter_size)))
+    # img_filter_num.shape = (in_channel, kernel_size, kernel_size, out_channel)
+    img_filter_num = img_filter_weight.shape[-1]
+    grid_size = int(np.ceil(np.sqrt(img_filter_num)))
 
     w_min, w_max = np.min(img_filter_weight), np.max(img_filter_weight)
 
-    for i in range(img_filter_size):
+    for i in range(img_filter_num):
         plt.subplot(grid_size, grid_size, i + 1)
         # Rescale the weights to be between 0 and 255
         wimg = 255.0 * (img_filter_weight[:, :, :, i].squeeze() - w_min) / (w_max - w_min)
         plt.imshow(wimg.astype('uint8'))
         plt.axis('off')
 
-    plt.savefig('img_filter_weight.png')
+    plt.savefig('vis/img_filter_weight.png')
+    plt.clf()
 
 
 def vis_feature_maps(model,
-                     img_path='elephant.jpg',
-                     convolution_number=1):
+                     img_path='elephant.png'):
     """vis vgg feature-maps"""
-    layer_outputs = [layer.output for layer in model.layers]
+    # exclude input layer
+    layer_outputs = [layer.output
+                     for layer in model.layers
+                     if not isinstance(layer, layers.InputLayer)]
+    layer_names = [layer.name
+                   for layer in model.layers
+                   if not isinstance(layer, layers.InputLayer)]
     feature_extractor = models.Model(
         inputs=model.input,
         outputs=layer_outputs)
@@ -71,11 +77,24 @@ def vis_feature_maps(model,
 
     feature_maps = feature_extractor.predict(x)
 
-    f, axarr = plt.subplots(1, 4)
+    for i, feature_map in enumerate(feature_maps):
+        vis_feature_map_grid(feature_map, 'vis/%s_feature_map.png' % layer_names[i])
 
-    for x in range(0, 4):
-        axarr[0, x].imshow(feature_maps[0, :, :, convolution_number], cmap='inferno')
-        axarr[0, x].grid(False)
+
+def vis_feature_map_grid(feature_map, save_path):
+    # feature_map.shape = (1, height, width, channel)
+    channel_size = feature_map.shape[-1]
+    grid_size = int(np.ceil(np.sqrt(channel_size)))
+    w_min, w_max = np.min(feature_map), np.max(feature_map)
+    for i in range(channel_size):
+        plt.subplot(grid_size, grid_size, i + 1)
+        # Rescale the weights to be between 0 and 255
+        wimg = 255.0 * (feature_map[:, :, :, i].squeeze() - w_min) / (w_max - w_min)
+        plt.imshow(wimg.astype('uint8'))
+        plt.axis('off')
+    plt.savefig(save_path)
+    plt.clf()
+
 
 # content reconstruction
 
@@ -93,7 +112,7 @@ def random_image():
 def run():
     vgg_model = load_model()
     vis_img_filters(vgg_model)
-    vis_feature_maps(vgg_model, img_path='elephant.jpg', convolution_number=1)
+    vis_feature_maps(vgg_model)
 
 
 def main(_):
