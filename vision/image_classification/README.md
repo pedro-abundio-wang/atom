@@ -3,35 +3,35 @@
 * [Classifier Trainer](#classifier-trainer) a framework that uses the Keras
 compile/fit methods for image classification models, including:
   * AlexNet
-    * loss: 3.1398 - top_5_accuracy: 0.7995 - accuracy: 0.5642 - 30min/epoch
+    * loss: 3.0642 - accuracy: 0.5754 - top_5_accuracy: 0.8072 - 30min/epoch
     * Total params: 62,416,616
     * Trainable params: 62,397,480
     * Non-trainable params: 19,136
-  * ResNet18 
+  * ResNet18
     * 80min/epoch
     * Total params: 11,708,328
     * Trainable params: 11,698,600
     * Non-trainable params: 9,728
   * ResNet50
     * 5h/epoch
-  * GoogLeNet 
+  * GoogLeNet
     * 110min/epoch
-    * Total params: 7,027,672 
+    * Total params: 7,027,672
     * Trainable params: 7,013,112
     * Non-trainable params: 14,560
-  * ResNet18V2 
+  * ResNet18V2
     * 80min/epoch
-  * ResNet50V2 
+  * ResNet50V2
     * 4h/epoch
   * InceptionV3
   * InceptionV4
   * Inception-ResNet
-  * Vgg16 
+  * Vgg16
     * 9h/epoch
   * WideResNet
   * ResNeXt
   * ShuffleNet
-  * SqueezeNets 
+  * SqueezeNets
     * 80min/epoch
     * Total params: 1,248,424
     * Trainable params: 1,248,424
