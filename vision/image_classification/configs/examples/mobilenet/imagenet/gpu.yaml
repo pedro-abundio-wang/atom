@@ -1,5 +1,4 @@
-# Training configuration for ResNet trained on ImageNet on GPUs.
-# Reaches > 76.1% within 90 epochs.
+# Training configuration for MobileNet trained on ImageNet on GPUs.
 # Note: This configuration uses a scaled per-replica batch size based on the number of devices.
 runtime:
   model_dir: null
@@ -13,10 +12,10 @@ train_dataset:
   data_dir: null
   builder: 'records'
   split: 'train'
-  image_size: 224
+  image_size: 227
   num_classes: 1000
   num_examples: 1281167
-  batch_size: 128
+  batch_size: 256
   use_per_replica_batch_size: True
   dtype: 'float32'
   mean_subtract: True
@@ -26,16 +25,16 @@ validation_dataset:
   data_dir: null
   builder: 'records'
   split: 'validation'
-  image_size: 224
+  image_size: 227
   num_classes: 1000
   num_examples: 50000
-  batch_size: 128
+  batch_size: 256
   use_per_replica_batch_size: True
   dtype: 'float32'
   mean_subtract: True
   standardize: True
 model:
-  model_name: 'resnet18'
+  model_name: 'mobilenet'
   optimizer:
     name: 'momentum'
     momentum: 0.9

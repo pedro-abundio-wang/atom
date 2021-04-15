@@ -4,7 +4,9 @@
 runtime:
   model_dir: null
   mode: 'train_and_eval'
-  distribution_strategy: 'mirrored'
+  distribution_strategy: 'off'
+  enable_xla: True
+  run_eagerly: False
   num_gpus: 1
 train_dataset:
   name: 'imagenet2012'

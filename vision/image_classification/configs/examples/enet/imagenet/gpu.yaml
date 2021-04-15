@@ -3,9 +3,10 @@
 runtime:
   model_dir: null
   mode: 'train_and_eval'
-  distribution_strategy: 'one_device'
+  distribution_strategy: 'off'
+  enable_xla: True
+  run_eagerly: False
   num_gpus: 1
-  enable_xla: False
 train_dataset:
   name: 'camvid'
   data_dir: null
