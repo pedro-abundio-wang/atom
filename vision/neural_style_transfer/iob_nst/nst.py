@@ -14,13 +14,36 @@ from absl import logging
 
 import numpy as np
 import matplotlib.pyplot as plt
+
 import tensorflow as tf
 
-from tensorflow.keras import backend
 from tensorflow.keras import models
+from tensorflow.keras import optimizers
 from tensorflow.keras import layers
 from tensorflow.keras import applications
 from tensorflow.keras import preprocessing
+
+
+def preprocess_image(image_path):
+    # Util function to open, resize and format pictures into appropriate tensors
+    image = preprocessing.image.load_img(image_path, target_size=(224, 224))
+    image = preprocessing.image.img_to_array(image)
+    image = np.expand_dims(image, axis=0)
+    image = applications.vgg19.preprocess_input(image)
+    return tf.convert_to_tensor(image)
+
+
+def deprocess_image(image):
+    # Util function to convert a tensor into a valid image
+    image = image.reshape((224, 224, 3))
+    # Remove zero-center by mean pixel
+    image[:, :, 0] += 103.939
+    image[:, :, 1] += 116.779
+    image[:, :, 2] += 123.68
+    # 'BGR'->'RGB'
+    image = image[:, :, ::-1]
+    image = np.clip(image, 0, 255).astype("uint8")
+    return image
 
 
 def load_model():
@@ -58,7 +81,7 @@ def vis_img_filters(model):
 
 def vis_feature_maps(model,
                      img_path='elephant.png'):
-    """vis vgg feature-maps"""
+    """vis vgg feature maps"""
     # exclude input layer
     layer_outputs = [layer.output
                      for layer in model.layers
@@ -96,23 +119,195 @@ def vis_feature_map_grid(feature_map, save_path):
     plt.clf()
 
 
-# content reconstruction
+def gram_matrix(features, normalize=True):
+    """
+    Compute the Gram matrix from features.
+
+    Inputs:
+    - features: Tensor of shape (1, height, width, channel) giving features for
+      a single image.
+    - normalize: optional, whether to normalize the Gram matrix
+        If True, divide the Gram matrix by the number of neurons (height * width * channel)
+
+    Returns:
+    - gram: Tensor of shape (channel, channel) giving the (optionally normalized)
+      Gram matrices for the input image.
+    """
+    height, width, channel = features.shape
+    feature_maps = tf.reshape(features, (height * width, channel))
+    gram = tf.matmul(feature_maps, tf.transpose(feature_maps))
+    if normalize:
+        gram = tf.divide(gram, tf.cast(0.5 * height * width * channel, gram.dtype))
+
+    return gram
 
 
-def random_image():
-    # We start from a gray image with some random noise
-    img = tf.random.uniform((1, 224, 224, 3))
-    # ResNet50V2 expects inputs in the range [-1, +1].
-    # Here we scale our random inputs to [-0.125, +0.125]
-    return (img - 0.5) * 0.25
+def style_loss(style, combination):
+    style_gram = gram_matrix(style, normalize=True)
+    combination_gram = gram_matrix(combination, normalize=True)
+    return tf.square(tf.norm(style_gram - combination_gram))
 
-# sytle reconstruction
+
+def content_loss(content, combination):
+    return 0.5 * tf.square(tf.norm(combination - content))
+
+
+def total_variation_loss(image):
+    """
+    Compute total variation loss.
+
+    Inputs:
+    - img: Tensor of shape (1, height, width, 3) holding an input image.
+    - tv_weight: Scalar giving the weight w_t to use for the TV loss.
+
+    Returns:
+    - loss: Tensor holding a scalar giving the total variation loss
+      for img weighted by tv_weight.
+    """
+    # Your implementation should be vectorized and not require any loops!
+    image = tf.squeeze(image)
+    height, width, channel = image.shape
+
+    img_col_start = tf.slice(image, [0, 0, 0], [height, width - 1, channel])
+    img_col_end = tf.slice(image, [0, 1, 0], [height, width - 1, channel])
+    img_row_start = tf.slice(image, [0, 0, 0], [height - 1, width, channel])
+    img_row_end = tf.slice(image, [1, 0, 0], [height - 1, width, channel])
+    return tf.reduce_sum(tf.square(img_col_end - img_col_start)) + tf.reduce_sum(tf.square(img_row_end - img_row_start))
+
+
+def compute_loss(model,
+                 combination_image,
+                 content_image,
+                 style_image,
+                 content_layer_name,
+                 content_weight,
+                 style_layer_names,
+                 total_variation_weight):
+
+    # Get the symbolic outputs of each "key" layer (we gave them unique names).
+    outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
+
+    # Set up a model that returns the activation values for every layer in
+    # VGG19 (as a dict).
+    feature_extractor = models.Model(inputs=model.inputs, outputs=outputs_dict)
+
+    input_tensor = tf.concat(
+        [content_image, style_image, combination_image], axis=0
+    )
+    features = feature_extractor(input_tensor)
+
+    # Initialize the loss
+    loss = tf.zeros(shape=())
+
+    # content loss
+    layer_features = features[content_layer_name]
+    content_image_features = layer_features[0, :, :, :]
+    combination_features = layer_features[2, :, :, :]
+    loss += content_weight * content_loss(content_image_features, combination_features)
+
+    # style loss
+    style_weight = 1.0 / len(style_layer_names)
+    for layer_name in style_layer_names:
+        layer_features = features[layer_name]
+        style_features = layer_features[1, :, :, :]
+        combination_features = layer_features[2, :, :, :]
+        loss += style_weight * style_loss(style_features, combination_features)
+
+    # total variation loss
+    loss += total_variation_weight * total_variation_loss(combination_image)
+    return loss
+
+
+def compute_loss_and_grads(model,
+                           combination_image,
+                           content_image,
+                           style_image,
+                           content_layer_name,
+                           content_weight,
+                           style_layer_names,
+                           total_variation_weight):
+    """
+    ## Add a tf.function decorator to loss & gradient computation
+    To compile it, and thus make it fast.
+    """
+    with tf.GradientTape() as tape:
+        loss = compute_loss(model,
+                            combination_image,
+                            content_image,
+                            style_image,
+                            content_layer_name,
+                            content_weight,
+                            style_layer_names,
+                            total_variation_weight)
+    grads = tape.gradient(loss, combination_image)
+    return loss, grads
+
+
+def neural_style_transfer(model,
+                          content_image_path,
+                          style_image_path,
+                          content_layer_name,
+                          content_weight,
+                          style_layer_names,
+                          total_variation_weight,
+                          init_random=True):
+
+    # decay the learning rate by 0.96 every 100 steps.
+    optimizer = optimizers.SGD(
+        optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=100.0, decay_steps=100, decay_rate=0.96
+        )
+    )
+
+    content_image = preprocess_image(content_image_path)
+    style_image = preprocess_image(style_image_path)
+    if init_random:
+        combination_image = tf.Variable(tf.random.uniform((224, 224, 3)))
+        combination_image = tf.expand_dims(combination_image, axis=0)
+    else:
+        combination_image = tf.Variable(preprocess_image(content_image))
+
+    iterations = 4000
+    for i in range(1, iterations + 1):
+        loss, grads = compute_loss_and_grads(
+            model,
+            combination_image,
+            content_image,
+            style_image,
+            content_layer_name,
+            content_weight,
+            style_layer_names,
+            total_variation_weight)
+        optimizer.apply_gradients([(grads, combination_image)])
+        if i % 100 == 0:
+            logging.info("Iteration %d: loss=%.2f" % (i, loss))
+            img = deprocess_image(combination_image.numpy())
+            fname = "generated_at_iteration_%d.png" % i
+            preprocessing.image.save_img(fname, img)
 
 
 def run():
     vgg_model = load_model()
-    vis_img_filters(vgg_model)
-    vis_feature_maps(vgg_model)
+    # vis_img_filters(vgg_model)
+    # vis_feature_maps(vgg_model)
+
+    params = {
+        'content_image_path': 'elephant.png',
+        'style_image_path': 'starry_night.jpg',
+        'content_layer_name': 'block4_conv2',
+        'content_weight': 1e-3,
+        'style_layer_names': [
+            "block1_conv1",
+            "block2_conv1",
+            "block3_conv1",
+            "block4_conv1",
+            "block5_conv1",
+        ],
+        'total_variation_weight': 1e-3,
+        'init_random': True
+    }
+
+    neural_style_transfer(vgg_model, **params)
 
 
 def main(_):
