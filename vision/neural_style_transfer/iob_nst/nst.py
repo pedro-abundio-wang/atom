@@ -57,7 +57,6 @@ def load_model():
 
 
 def vis_img_filters(model):
-
     # 1st conv filter weight
     img_filter_weight = [weight
                          for weight in model.weights
@@ -182,8 +181,8 @@ def compute_loss(model,
                  content_layer_name,
                  content_weight,
                  style_layer_names,
+                 style_weights,
                  total_variation_weight):
-
     # Get the symbolic outputs of each "key" layer (we gave them unique names).
     outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
 
@@ -206,9 +205,9 @@ def compute_loss(model,
     loss += content_weight * content_loss(content_image_features, combination_features)
 
     # style loss
-    style_weight = 1.0 / len(style_layer_names)
-    for layer_name in style_layer_names:
+    for i, layer_name in enumerate(style_layer_names):
         layer_features = features[layer_name]
+        style_weight = style_weights[i]
         style_features = layer_features[1, :, :, :]
         combination_features = layer_features[2, :, :, :]
         loss += style_weight * style_loss(style_features, combination_features)
@@ -225,6 +224,7 @@ def compute_loss_and_grads(model,
                            content_layer_name,
                            content_weight,
                            style_layer_names,
+                           style_weights,
                            total_variation_weight):
     """
     ## Add a tf.function decorator to loss & gradient computation
@@ -238,6 +238,7 @@ def compute_loss_and_grads(model,
                             content_layer_name,
                             content_weight,
                             style_layer_names,
+                            style_weights,
                             total_variation_weight)
     grads = tape.gradient(loss, combination_image)
     return loss, grads
@@ -249,9 +250,10 @@ def neural_style_transfer(model,
                           content_layer_name,
                           content_weight,
                           style_layer_names,
+                          style_weights,
                           total_variation_weight,
+                          result_prefix,
                           init_random=True):
-
     # decay the learning rate by 0.96 every 100 steps.
     optimizer = optimizers.SGD(
         optimizers.schedules.ExponentialDecay(
@@ -277,20 +279,107 @@ def neural_style_transfer(model,
             content_layer_name,
             content_weight,
             style_layer_names,
+            style_weights,
             total_variation_weight)
         optimizer.apply_gradients([(grads, combination_image)])
         if i % 100 == 0:
             logging.info("Iteration %d: loss=%.2f" % (i, loss))
             img = deprocess_image(combination_image.numpy())
-            fname = "generated_at_iteration_%d.png" % i
+            fname = "vis/%s_iteration_%d.png" % (result_prefix, i)
             preprocessing.image.save_img(fname, img)
 
 
-def run():
-    vgg_model = load_model()
-    # vis_img_filters(vgg_model)
-    # vis_feature_maps(vgg_model)
+def content_reconstructions(vgg_model):
 
+    # block4_conv2_content_reconstructions
+    params = {
+        'content_image_path': 'elephant.png',
+        'style_image_path': 'starry_night.jpg',
+        'content_layer_name': 'block4_conv2',
+        'content_weight': 1,
+        'total_variation_weight': 1e-3,
+        'result_prefix': 'block4_conv2_content_reconstructions',
+        'init_random': True
+    }
+
+    neural_style_transfer(vgg_model, **params)
+
+    # block2_conv2_content_reconstructions
+    params = {
+        'content_image_path': 'elephant.png',
+        'style_image_path': 'starry_night.jpg',
+        'content_layer_name': 'block2_conv2',
+        'content_weight': 1,
+        'total_variation_weight': 1e-3,
+        'result_prefix': 'block2_conv2_content_reconstructions',
+        'init_random': True
+    }
+
+    neural_style_transfer(vgg_model, **params)
+
+
+def style_reconstructions(vgg_model):
+
+    # block1_conv1_style_reconstructions
+    params = {
+        'content_image_path': 'elephant.png',
+        'style_image_path': 'starry_night.jpg',
+        'content_layer_name': 'block4_conv2',
+        'content_weight': 0,
+        'style_layer_names': [
+            "block1_conv1",
+        ],
+        'style_weights': [1.0],
+        'total_variation_weight': 1e-3,
+        'result_prefix': 'block1_conv1_style_reconstructions',
+        'init_random': True
+    }
+
+    neural_style_transfer(vgg_model, **params)
+
+    # block3_conv1_style_reconstructions
+    params = {
+        'content_image_path': 'elephant.png',
+        'style_image_path': 'starry_night.jpg',
+        'content_layer_name': 'block4_conv2',
+        'content_weight': 0,
+        'style_layer_names': [
+            "block1_conv1",
+            "block2_conv1",
+            "block3_conv1",
+        ],
+        'style_weights': [0.33, 0.33, 0.33],
+        'total_variation_weight': 1e-3,
+        'result_prefix': 'block3_conv1_style_reconstructions',
+        'init_random': True
+    }
+
+    neural_style_transfer(vgg_model, **params)
+
+    # block5_conv1_style_reconstructions
+    params = {
+        'content_image_path': 'elephant.png',
+        'style_image_path': 'starry_night.jpg',
+        'content_layer_name': 'block4_conv2',
+        'content_weight': 0,
+        'style_layer_names': [
+            "block1_conv1",
+            "block2_conv1",
+            "block3_conv1",
+            "block4_conv1",
+            "block5_conv1",
+        ],
+        'style_weights': [0.2, 0.2, 0.2, 0.2, 0.2],
+        'total_variation_weight': 1e-3,
+        'result_prefix': 'block5_conv1_style_reconstructions',
+        'init_random': True
+    }
+
+    neural_style_transfer(vgg_model, **params)
+
+
+def nst(vgg_model):
+    # nst
     params = {
         'content_image_path': 'elephant.png',
         'style_image_path': 'starry_night.jpg',
@@ -303,11 +392,23 @@ def run():
             "block4_conv1",
             "block5_conv1",
         ],
+        'style_weights': [0.2, 0.2, 0.2, 0.2, 0.2],
         'total_variation_weight': 1e-3,
+        'result_prefix': 'nst',
         'init_random': True
     }
 
     neural_style_transfer(vgg_model, **params)
+
+
+def run():
+    vgg_model = load_model()
+    vis_img_filters(vgg_model)
+    vis_feature_maps(vgg_model)
+
+    content_reconstructions(vgg_model)
+    style_reconstructions(vgg_model)
+    nst(vgg_model)
 
 
 def main(_):
