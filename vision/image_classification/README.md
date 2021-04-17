@@ -3,37 +3,44 @@
 * [Classifier Trainer](#classifier-trainer) a framework that uses the Keras
 compile/fit methods for image classification models, including:
   * AlexNet
-    * batch_size=256, 30min/epoch
     * Total params: 62,416,616
     * Trainable params: 62,397,480
     * Non-trainable params: 19,136
+    * batch_size=256, dtype=float32, epochs=90, 30min/epoch
     * loss: 3.0642 - accuracy: 0.5754 - top_5_accuracy: 0.8072
   * ResNet18
-    * 80min/epoch
     * Total params: 11,708,328
     * Trainable params: 11,698,600
     * Non-trainable params: 9,728
+    * batch_size=256, dtype=mixed_float16, epochs=90, 70min/epoch
   * ResNet50
-    * 5h/epoch
+    * Total params: 25,636,712
+    * Trainable params: 25,583,592
+    * Non-trainable params: 53,120
   * GoogLeNet
-    * 110min/epoch
     * Total params: 7,027,672
     * Trainable params: 7,013,112
     * Non-trainable params: 14,560
   * ResNet18V2
-    * 80min/epoch
+    * Total params: 11,700,648
+    * Trainable params: 11,692,840
+    * Non-trainable params: 7,808
   * ResNet50V2
-    * 4h/epoch
+    * Total params: 25,613,800
+    * Trainable params: 25,568,360
+    * Non-trainable params: 45,440
   * InceptionV3
   * InceptionV4
   * Inception-ResNet
   * Vgg16
-    * 9h/epoch
+    * Total params: 138,407,208
+    * Trainable params: 138,382,376
+    * Non-trainable params: 24,832
+  * Vgg19
   * WideResNet
   * ResNeXt
   * ShuffleNet
   * SqueezeNets
-    * 80min/epoch
     * Total params: 1,248,424
     * Trainable params: 1,248,424
     * Non-trainable params: 0
