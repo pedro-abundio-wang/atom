@@ -234,6 +234,37 @@ class Vgg16ImagenetConfig(base_configs.ExperimentConfig):
     model: base_configs.ModelConfig = vgg_config.Vgg16ModelConfig()
 
 
+@dataclasses.dataclass()
+class Vgg19ImagenetConfig(base_configs.ExperimentConfig):
+    """Base configuration to train Vgg19 on ImageNet."""
+    export: base_configs.ExportConfig = base_configs.ExportConfig()
+    runtime: base_configs.RuntimeConfig = base_configs.RuntimeConfig()
+    train_dataset: dataset_factory.DatasetConfig = \
+        dataset_factory.ImageNetConfig(split='train',
+                                       one_hot=False,
+                                       mean_subtract=True,
+                                       standardize=True)
+    validation_dataset: dataset_factory.DatasetConfig = \
+        dataset_factory.ImageNetConfig(split='validation',
+                                       one_hot=False,
+                                       mean_subtract=True,
+                                       standardize=True)
+    train: base_configs.TrainConfig = base_configs.TrainConfig(
+        resume_checkpoint=True,
+        epochs=90,
+        steps=None,
+        callbacks=base_configs.CallbacksConfig(enable_checkpoint_and_export=True,
+                                               enable_tensorboard=True),
+        metrics=['accuracy', 'top_5'],
+        time_history=base_configs.TimeHistoryConfig(log_steps=100),
+        tensorboard=base_configs.TensorboardConfig(track_lr=True,
+                                                   write_model_weights=False))
+    evaluation: base_configs.EvalConfig = base_configs.EvalConfig(
+        epochs_between_evals=1,
+        steps=None)
+    model: base_configs.ModelConfig = vgg_config.Vgg19ModelConfig()
+
+
 @dataclasses.dataclass
 class SqueezeNetImagenetConfig(base_configs.ExperimentConfig):
     """Base configuration to train SqueezeNet on ImageNet."""
@@ -307,6 +338,7 @@ def get_config(model: str, dataset: str) -> base_configs.ExperimentConfig:
             'resnet18v2': ResNet18V2ImagenetConfig(),
             'resnet50v2': ResNet50V2ImagenetConfig(),
             'vgg16': Vgg16ImagenetConfig(),
+            'vgg19': Vgg19ImagenetConfig(),
             'squeeze': SqueezeNetImagenetConfig(),
             'mobile': MobileNetImagenetConfig(),
         }

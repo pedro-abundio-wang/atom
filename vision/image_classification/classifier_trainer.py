@@ -36,6 +36,7 @@ from vision.image_classification.inception import googlenet_model
 from vision.image_classification.resnet import resnet18v2_model
 from vision.image_classification.resnet import resnet50v2_model
 from vision.image_classification.vgg import vgg16_model
+from vision.image_classification.vgg import vgg19_model
 from vision.image_classification.squeeze import squeeze_model
 from vision.image_classification.mobile import mobilenet_model
 
@@ -50,6 +51,7 @@ def get_models() -> Mapping[str, tf.keras.Model]:
         'resnet18v2': resnet18v2_model.resnet18v2,
         'resnet50v2': resnet50v2_model.resnet50v2,
         'vgg16': vgg16_model.vgg16,
+        'vgg19': vgg19_model.vgg19,
         'squeeze': squeeze_model.squeezenet,
         'mobile': mobilenet_model.mobilenet,
     }
