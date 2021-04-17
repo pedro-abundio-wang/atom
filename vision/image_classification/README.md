@@ -48,6 +48,9 @@ compile/fit methods for image classification models, including:
     * Trainable params: 1,248,424
     * Non-trainable params: 0
   * MobileNet
+    * Total params: 4,253,864
+    * Trainable params: 4,231,976
+    * Non-trainable params: 21,888
   * EfficientNet
   * Xception
 

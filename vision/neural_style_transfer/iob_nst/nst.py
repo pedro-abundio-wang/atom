@@ -416,8 +416,8 @@ def nst(vgg_model):
 
 def run():
     vgg_model = load_model()
-    # vis_img_filters(vgg_model)
-    # vis_feature_maps(vgg_model)
+    vis_img_filters(vgg_model)
+    vis_feature_maps(vgg_model)
 
     content_reconstructions(vgg_model)
     style_reconstructions(vgg_model)

@@ -12,12 +12,12 @@ train_dataset:
   data_dir: null
   builder: 'records'
   split: 'train'
-  image_size: 227
+  image_size: 224
   num_classes: 1000
   num_examples: 1281167
   batch_size: 256
   use_per_replica_batch_size: True
-  dtype: 'float32'
+  dtype: 'float16'
   mean_subtract: True
   standardize: True
 validation_dataset:
@@ -25,12 +25,12 @@ validation_dataset:
   data_dir: null
   builder: 'records'
   split: 'validation'
-  image_size: 227
+  image_size: 224
   num_classes: 1000
   num_examples: 50000
   batch_size: 256
   use_per_replica_batch_size: True
-  dtype: 'float32'
+  dtype: 'float16'
   mean_subtract: True
   standardize: True
 model:
