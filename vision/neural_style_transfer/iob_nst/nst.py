@@ -82,25 +82,21 @@ def vis_feature_maps(model,
                      img_path='elephant.png'):
     """vis vgg feature maps"""
     # exclude input layer
-    layer_outputs = [layer.output
-                     for layer in model.layers
-                     if not isinstance(layer, layers.InputLayer)]
-    layer_names = [layer.name
-                   for layer in model.layers
-                   if not isinstance(layer, layers.InputLayer)]
-    feature_extractor = models.Model(
-        inputs=model.input,
-        outputs=layer_outputs)
+    # Get the symbolic outputs of each "key" layer (we gave them unique names).
+    outputs_dict = dict([(layer.name, layer.output)
+                         for layer in model.layers
+                         if not isinstance(layer, layers.InputLayer)])
 
-    img = preprocessing.image.load_img(img_path, target_size=(224, 224))
-    x = preprocessing.image.img_to_array(img)
-    x = np.expand_dims(x, axis=0)
-    x = applications.vgg19.preprocess_input(x)
+    # Set up a model that returns the activation values for every layer in
+    # VGG19 (as a dict).
+    feature_extractor = models.Model(inputs=model.inputs, outputs=outputs_dict)
 
-    feature_maps = feature_extractor.predict(x)
+    image = preprocess_image(img_path)
+    feature_maps = feature_extractor.predict(image)
 
-    for i, feature_map in enumerate(feature_maps):
-        vis_feature_map_grid(feature_map, 'vis/%s_feature_map.png' % layer_names[i])
+    for layer_name, feature_map in feature_maps.items():
+        logging.info("visual feature map grid, layer_name = %s" % layer_name)
+        vis_feature_map_grid(feature_map, 'vis/%s_feature_map.png' % layer_name)
 
 
 def vis_feature_map_grid(feature_map, save_path):
@@ -193,7 +189,8 @@ def compute_loss(model,
     input_tensor = tf.concat(
         [content_image, style_image, combination_image], axis=0
     )
-    features = feature_extractor(input_tensor)
+
+    features = feature_extractor.predict(input_tensor)
 
     # Initialize the loss
     loss = tf.zeros(shape=())
@@ -205,12 +202,13 @@ def compute_loss(model,
     loss += content_weight * content_loss(content_image_features, combination_features)
 
     # style loss
-    for i, layer_name in enumerate(style_layer_names):
-        layer_features = features[layer_name]
-        style_weight = style_weights[i]
-        style_features = layer_features[1, :, :, :]
-        combination_features = layer_features[2, :, :, :]
-        loss += style_weight * style_loss(style_features, combination_features)
+    if style_layer_names is not None:
+        for i, layer_name in enumerate(style_layer_names):
+            layer_features = features[layer_name]
+            style_weight = style_weights[i]
+            style_features = layer_features[1, :, :, :]
+            combination_features = layer_features[2, :, :, :]
+            loss += style_weight * style_loss(style_features, combination_features)
 
     # total variation loss
     loss += total_variation_weight * total_variation_loss(combination_image)
@@ -271,16 +269,27 @@ def neural_style_transfer(model,
 
     iterations = 4000
     for i in range(1, iterations + 1):
-        loss, grads = compute_loss_and_grads(
-            model,
-            combination_image,
-            content_image,
-            style_image,
-            content_layer_name,
-            content_weight,
-            style_layer_names,
-            style_weights,
-            total_variation_weight)
+        # loss, grads = compute_loss_and_grads(
+        #     model,
+        #     combination_image,
+        #     content_image,
+        #     style_image,
+        #     content_layer_name,
+        #     content_weight,
+        #     style_layer_names,
+        #     style_weights,
+        #     total_variation_weight)
+        with tf.GradientTape() as tape:
+            loss = compute_loss(model,
+                                combination_image,
+                                content_image,
+                                style_image,
+                                content_layer_name,
+                                content_weight,
+                                style_layer_names,
+                                style_weights,
+                                total_variation_weight)
+        grads = tape.gradient(loss, combination_image)
         optimizer.apply_gradients([(grads, combination_image)])
         if i % 100 == 0:
             logging.info("Iteration %d: loss=%.2f" % (i, loss))
@@ -297,6 +306,8 @@ def content_reconstructions(vgg_model):
         'style_image_path': 'starry_night.jpg',
         'content_layer_name': 'block4_conv2',
         'content_weight': 1,
+        'style_layer_names': None,
+        'style_weights': None,
         'total_variation_weight': 1e-3,
         'result_prefix': 'block4_conv2_content_reconstructions',
         'init_random': True
@@ -310,6 +321,8 @@ def content_reconstructions(vgg_model):
         'style_image_path': 'starry_night.jpg',
         'content_layer_name': 'block2_conv2',
         'content_weight': 1,
+        'style_layer_names': None,
+        'style_weights': None,
         'total_variation_weight': 1e-3,
         'result_prefix': 'block2_conv2_content_reconstructions',
         'init_random': True
@@ -403,8 +416,8 @@ def nst(vgg_model):
 
 def run():
     vgg_model = load_model()
-    vis_img_filters(vgg_model)
-    vis_feature_maps(vgg_model)
+    # vis_img_filters(vgg_model)
+    # vis_feature_maps(vgg_model)
 
     content_reconstructions(vgg_model)
     style_reconstructions(vgg_model)

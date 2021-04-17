@@ -37,6 +37,9 @@ compile/fit methods for image classification models, including:
     * Trainable params: 138,382,376
     * Non-trainable params: 24,832
   * Vgg19
+    * Total params: 143,722,024
+    * Trainable params: 143,694,632
+    * Non-trainable params: 27,392
   * WideResNet
   * ResNeXt
   * ShuffleNet
