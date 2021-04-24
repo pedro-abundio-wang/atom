@@ -17,10 +17,6 @@ compile/fit methods for image classification models, including:
     * Total params: 25,636,712
     * Trainable params: 25,583,592
     * Non-trainable params: 53,120
-  * GoogLeNet
-    * Total params: 7,027,672
-    * Trainable params: 7,013,112
-    * Non-trainable params: 14,560
   * ResNet18V2
     * Total params: 11,700,648
     * Trainable params: 11,692,840
@@ -29,9 +25,14 @@ compile/fit methods for image classification models, including:
     * Total params: 25,613,800
     * Trainable params: 25,568,360
     * Non-trainable params: 45,440
+  * GoogLeNet
+    * Total params: 7,027,672
+    * Trainable params: 7,013,112
+    * Non-trainable params: 14,560
+  * InceptionV2
   * InceptionV3
   * InceptionV4
-  * Inception-ResNet
+  * Inception ResNet V2
   * Vgg16
     * Total params: 138,407,208
     * Trainable params: 138,382,376
@@ -43,6 +44,7 @@ compile/fit methods for image classification models, including:
   * WideResNet
   * ResNeXt
   * ShuffleNet
+  * ShuffleNetV2
   * SqueezeNets
     * Total params: 1,248,424
     * Trainable params: 1,248,424
@@ -51,7 +53,8 @@ compile/fit methods for image classification models, including:
     * Total params: 4,253,864
     * Trainable params: 4,231,976
     * Non-trainable params: 21,888
-  * EfficientNet
+  * MobileNetV2
+  * EfficientNet B0-B8
   * Xception
 
 ### ImageNet preparation

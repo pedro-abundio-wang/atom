@@ -8,6 +8,7 @@ runtime:
   enable_xla: True
   run_eagerly: False
   num_gpus: 1
+  loss_scale: 'dynamic'
 train_dataset:
   name: 'imagenet2012'
   data_dir: null

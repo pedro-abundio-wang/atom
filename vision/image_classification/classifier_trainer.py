@@ -341,6 +341,10 @@ def train_and_eval(
             optimizer_name=params.model.optimizer.name,
             base_learning_rate=learning_rate,
             params=params.model.optimizer.as_dict())
+        optimizer = performance.configure_optimizer(
+            optimizer,
+            use_float16=train_builder.dtype == 'float16',
+            loss_scale=get_loss_scale(params))
 
         metrics_map = _get_metrics(one_hot)
         metrics = [metrics_map[metric] for metric in params.train.metrics]
