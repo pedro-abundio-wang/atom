@@ -208,6 +208,128 @@ def realtime_nst():
     return model
 
 
+def gram_matrix(features, normalize=True):
+    """
+    Compute the Gram matrix from features.
+
+    Inputs:
+    - features: Tensor of shape (1, height, width, channel) giving features for
+      a single image.
+    - normalize: optional, whether to normalize the Gram matrix
+        If True, divide the Gram matrix by the number of neurons (height * width * channel)
+
+    Returns:
+    - gram: Tensor of shape (channel, channel) giving the (optionally normalized)
+      Gram matrices for the input image.
+    """
+    height, width, channel = features.shape
+    feature_maps = tf.reshape(features, (height * width, channel))
+    gram = tf.matmul(feature_maps, tf.transpose(feature_maps))
+    if normalize:
+        gram = tf.divide(gram, tf.cast(0.5 * height * width * channel, gram.dtype))
+
+    return gram
+
+
+def style_loss(style, combination):
+    style_gram = gram_matrix(style, normalize=True)
+    combination_gram = gram_matrix(combination, normalize=True)
+    return tf.square(tf.norm(style_gram - combination_gram))
+
+
+def content_loss(content, combination):
+    return 0.5 * tf.square(tf.norm(combination - content))
+
+
+def total_variation_loss(image):
+    """
+    Compute total variation loss.
+
+    Inputs:
+    - img: Tensor of shape (1, height, width, 3) holding an input image.
+    - tv_weight: Scalar giving the weight w_t to use for the TV loss.
+
+    Returns:
+    - loss: Tensor holding a scalar giving the total variation loss
+      for img weighted by tv_weight.
+    """
+    # Your implementation should be vectorized and not require any loops!
+    image = tf.squeeze(image)
+    height, width, channel = image.shape
+
+    img_col_start = tf.slice(image, [0, 0, 0], [height, width - 1, channel])
+    img_col_end = tf.slice(image, [0, 1, 0], [height, width - 1, channel])
+    img_row_start = tf.slice(image, [0, 0, 0], [height - 1, width, channel])
+    img_row_end = tf.slice(image, [1, 0, 0], [height - 1, width, channel])
+    return tf.reduce_sum(tf.square(img_col_end - img_col_start)) + tf.reduce_sum(tf.square(img_row_end - img_row_start))
+
+
+def compute_loss(feature_extractor,
+                 combination_image,
+                 content_image,
+                 style_image,
+                 content_layer_name,
+                 content_weight,
+                 style_layer_names,
+                 style_weights,
+                 total_variation_weight):
+
+    input_tensor = tf.concat(
+        [content_image, style_image, combination_image], axis=0
+    )
+
+    features = feature_extractor(input_tensor)
+
+    # Initialize the loss
+    loss = tf.zeros(shape=())
+
+    # content loss
+    layer_features = features[content_layer_name]
+    content_image_features = layer_features[0, :, :, :]
+    combination_features = layer_features[2, :, :, :]
+    loss += content_weight * content_loss(content_image_features, combination_features)
+
+    # style loss
+    if style_layer_names is not None:
+        for i, layer_name in enumerate(style_layer_names):
+            layer_features = features[layer_name]
+            style_weight = style_weights[i]
+            style_features = layer_features[1, :, :, :]
+            combination_features = layer_features[2, :, :, :]
+            loss += style_weight * style_loss(style_features, combination_features)
+
+    # total variation loss
+    loss += total_variation_weight * total_variation_loss(combination_image)
+    return loss
+
+
+def compute_loss_and_grads(feature_extractor,
+                           combination_image,
+                           content_image,
+                           style_image,
+                           content_layer_name,
+                           content_weight,
+                           style_layer_names,
+                           style_weights,
+                           total_variation_weight):
+    """
+    ## Add a tf.function decorator to loss & gradient computation
+    To compile it, and thus make it fast.
+    """
+    with tf.GradientTape() as tape:
+        loss = compute_loss(feature_extractor,
+                            combination_image,
+                            content_image,
+                            style_image,
+                            content_layer_name,
+                            content_weight,
+                            style_layer_names,
+                            style_weights,
+                            total_variation_weight)
+    grads = tape.gradient(loss, combination_image)
+    return loss, grads
+
+
 def run(style_image_path,
         content_layer_name,
         content_weight,
@@ -216,15 +338,14 @@ def run(style_image_path,
         total_variation_weight,
         result_prefix):
 
-    input_image = 'elephant.png'
-    content_image = None
-    style_image = 'starry_night.jpg'
+    content_image_path = 'elephant.png'
+    style_image_path = 'starry_night.jpg'
 
-    image_tensor = preprocess_image(input_image)
+    content_image = preprocess_image(content_image_path)
+    style_image = preprocess_image(style_image_path)
+    combination_image = tf.Variable(preprocess_image(content_image_path))
 
-    model = realtime_nst()
-
-    features = model(image_tensor)
+    feature_extractor = realtime_nst()
 
     optimizer = optimizers.Adam(
         optimizers.schedules.ExponentialDecay(
@@ -235,7 +356,8 @@ def run(style_image_path,
     iterations = 10000
     for i in range(1, iterations + 1):
         loss, grads = compute_loss_and_grads(
-            features,
+            feature_extractor,
+            combination_image,
             content_image,
             style_image,
             content_layer_name,
@@ -245,7 +367,7 @@ def run(style_image_path,
             total_variation_weight)
         grads = [(tf.clip_by_value(grad, -5.0, 5.0))
                  for grad in grads]
-        optimizer.apply_gradients(zip(grads, model.trainable_weights))
+        optimizer.apply_gradients(zip(grads, feature_extractor.trainable_weights))
         if i % 100 == 0:
             logging.info("Iteration %d: loss=%.2f" % (i, loss))
 
