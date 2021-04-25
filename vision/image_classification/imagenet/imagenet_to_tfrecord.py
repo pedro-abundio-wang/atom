@@ -1,5 +1,7 @@
 r"""Script to process the Imagenet dataset.
 
+https://cloud.google.com/tpu/docs/imagenet-setup
+
 Imagenet format:
 
 - Training images: /data/imagenet/train/n03062245/n03062245_4620.JPEG
