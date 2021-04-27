@@ -31,7 +31,7 @@ fi
 
 (cd tf-models/research && protoc object_detection/protos/*.proto --python_out=.)
 
-UNZIP="unzip -nq"
+UNZIP="unzip -n"
 
 # Create the output directories.
 OUTPUT_DIR="${1%/}"
