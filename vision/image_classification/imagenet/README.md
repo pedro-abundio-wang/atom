@@ -8,7 +8,7 @@ processes imagenet into `TFRecords`.
 # `local_scratch_dir` will be where the TFRecords are stored.`
 python imagenet_to_tfrecord.py \
   --raw_data_dir=/data/imagenet \
-  --local_scratch_dir=/data/imagenet/tfrecord \
+  --local_scratch_dir=/data/imagenet/tfrecord
 ```
 
 **Image-Net with existing .tar files**
@@ -49,5 +49,5 @@ https://raw.githubusercontent.com/tensorflow/models/master/research/inception/in
 # Process the files. The TFRecords will end up in the --local_scratch_dir. 
 python imagenet_to_tfrecord.py \
   --raw_data_dir=$IMAGENET_HOME \
-  --local_scratch_dir=$IMAGENET_HOME/tfrecord \
+  --local_scratch_dir=$IMAGENET_HOME/tfrecord
 ```
