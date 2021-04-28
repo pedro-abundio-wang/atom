@@ -274,7 +274,7 @@ def _create_tf_record_from_coco_annotations(images_info_file,
 
     logging.info('writing to output path: %s', output_path)
     writers = [
-        tf.python_io.TFRecordWriter(
+        tf.compat.v1.python_io.TFRecordWriter(
             output_path + '-%05d-of-%05d.tfrecord' % (i, num_shards))
         for i in range(num_shards)
     ]
