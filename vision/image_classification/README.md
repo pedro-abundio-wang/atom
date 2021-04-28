@@ -6,13 +6,13 @@ compile/fit methods for image classification models, including:
     * Total params: 62,416,616
     * Trainable params: 62,397,480
     * Non-trainable params: 19,136
-    * batch_size=256, dtype=float32, epochs=90, 30min/epoch
+    * batch_size=256, dtype=float32, epochs=90, 30min/epoch, GTX1060
     * loss: 3.0642 - accuracy: 0.5754 - top_5_accuracy: 0.8072
   * ResNet18
     * Total params: 11,708,328
     * Trainable params: 11,698,600
     * Non-trainable params: 9,728
-    * batch_size=256, dtype=mixed_float16, epochs=90, 70min/epoch
+    * batch_size=256, dtype=mixed_float16, epochs=90
   * ResNet50
     * Total params: 25,636,712
     * Trainable params: 25,583,592
@@ -21,6 +21,9 @@ compile/fit methods for image classification models, including:
     * Total params: 11,700,648
     * Trainable params: 11,692,840
     * Non-trainable params: 7,808
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100 
+    * loss: 2.8414 - accuracy: 0.5771 - top_5_accuracy: 0.7967
+    * val_loss: 2.6135 - val_accuracy: 0.6187 - val_top_5_accuracy: 0.8402
   * ResNet50V2
     * Total params: 25,613,800
     * Trainable params: 25,568,360
@@ -29,6 +32,7 @@ compile/fit methods for image classification models, including:
     * Total params: 7,027,672
     * Trainable params: 7,013,112
     * Non-trainable params: 14,560
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
   * InceptionV2
   * InceptionV3
   * InceptionV4
