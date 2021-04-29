@@ -32,7 +32,9 @@ compile/fit methods for image classification models, including:
     * Total params: 7,027,672
     * Trainable params: 7,013,112
     * Non-trainable params: 14,560
-    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
+    * batch_size=256, dtype=mixed_float16, epochs=90, 15min/epoch, TeslaV100
+    * loss: 2.8186 - accuracy: 0.6292 - top_5_accuracy: 0.8353
+    * val_loss: 2.5143 - val_accuracy: 0.6865 - val_top_5_accuracy: 0.8858
   * InceptionV2
   * InceptionV3
   * InceptionV4
