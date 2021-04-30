@@ -146,7 +146,6 @@ def upsampling(input_tensor,
     :return: upsampling bottleneck block tensor
     """
 
-
     if keras.backend.image_data_format() == 'channels_last':
         channel_axis = -1
     else:

@@ -12,22 +12,24 @@ compile/fit methods for image classification models, including:
     * Total params: 11,708,328
     * Trainable params: 11,698,600
     * Non-trainable params: 9,728
-    * batch_size=256, dtype=mixed_float16, epochs=90
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
   * ResNet50
     * Total params: 25,636,712
     * Trainable params: 25,583,592
     * Non-trainable params: 53,120
+    * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100
   * ResNet18V2
     * Total params: 11,700,648
     * Trainable params: 11,692,840
     * Non-trainable params: 7,808
-    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100 
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
     * loss: 2.8414 - accuracy: 0.5771 - top_5_accuracy: 0.7967
     * val_loss: 2.6135 - val_accuracy: 0.6187 - val_top_5_accuracy: 0.8402
   * ResNet50V2
     * Total params: 25,613,800
     * Trainable params: 25,568,360
     * Non-trainable params: 45,440
+    * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100
   * GoogLeNet
     * Total params: 7,027,672
     * Trainable params: 7,013,112
@@ -35,10 +37,9 @@ compile/fit methods for image classification models, including:
     * batch_size=256, dtype=mixed_float16, epochs=90, 15min/epoch, TeslaV100
     * loss: 2.8186 - accuracy: 0.6292 - top_5_accuracy: 0.8353
     * val_loss: 2.5143 - val_accuracy: 0.6865 - val_top_5_accuracy: 0.8858
-  * InceptionV2
-  * InceptionV3
-  * InceptionV4
-  * Inception ResNet V2
+  * Inception
+  * Inception-ResNet
+  * Xception
   * Vgg16
     * Total params: 138,407,208
     * Trainable params: 138,382,376
@@ -50,7 +51,6 @@ compile/fit methods for image classification models, including:
   * WideResNet
   * ResNeXt
   * ShuffleNet
-  * ShuffleNetV2
   * SqueezeNets
     * Total params: 1,248,424
     * Trainable params: 1,248,424
@@ -59,9 +59,7 @@ compile/fit methods for image classification models, including:
     * Total params: 4,253,864
     * Trainable params: 4,231,976
     * Non-trainable params: 21,888
-  * MobileNetV2
-  * EfficientNet B0-B8
-  * Xception
+  * EfficientNet
 
 ### ImageNet preparation
 

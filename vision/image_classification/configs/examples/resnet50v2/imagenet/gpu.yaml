@@ -1,5 +1,4 @@
 # Training configuration for ResNet trained on ImageNet on GPUs.
-# Reaches > 76.1% within 90 epochs.
 # Note: This configuration uses a scaled per-replica batch size based on the number of devices.
 runtime:
   model_dir: null
