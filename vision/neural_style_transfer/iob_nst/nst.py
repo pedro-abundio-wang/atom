@@ -130,7 +130,7 @@ def gram_matrix(features, normalize=True):
     """
     height, width, channel = features.shape
     feature_maps = tf.reshape(features, (height * width, channel))
-    gram = tf.matmul(feature_maps, tf.transpose(feature_maps))
+    gram = tf.matmul(tf.transpose(feature_maps), feature_maps)
     if normalize:
         gram = tf.divide(gram, tf.cast(0.5 * height * width * channel, gram.dtype))
 
@@ -177,7 +177,7 @@ def compute_loss(feature_extractor,
                  content_layer_name,
                  content_weight,
                  style_layer_names,
-                 style_weights,
+                 style_weight,
                  total_variation_weight):
 
     input_tensor = tf.concat(
@@ -190,25 +190,26 @@ def compute_loss(feature_extractor,
     loss = tf.zeros(shape=())
 
     # content loss
-    layer_features = features[content_layer_name]
-    content_image_features = layer_features[0, :, :, :]
-    combination_features = layer_features[2, :, :, :]
-    loss += content_weight * content_loss(content_image_features, combination_features)
+    if content_layer_name is not None:
+        layer_features = features[content_layer_name]
+        content_image_features = layer_features[0, :, :, :]
+        combination_features = layer_features[2, :, :, :]
+        loss += content_weight * content_loss(content_image_features, combination_features)
 
     # style loss
     if style_layer_names is not None:
         for i, layer_name in enumerate(style_layer_names):
             layer_features = features[layer_name]
-            style_weight = style_weights[i]
             style_features = layer_features[1, :, :, :]
             combination_features = layer_features[2, :, :, :]
-            loss += style_weight * style_loss(style_features, combination_features)
+            loss += (style_weight / len(style_layer_names)) * style_loss(style_features, combination_features)
 
     # total variation loss
     loss += total_variation_weight * total_variation_loss(combination_image)
     return loss
 
 
+@tf.function
 def compute_loss_and_grads(feature_extractor,
                            combination_image,
                            content_image,
@@ -216,7 +217,7 @@ def compute_loss_and_grads(feature_extractor,
                            content_layer_name,
                            content_weight,
                            style_layer_names,
-                           style_weights,
+                           style_weight,
                            total_variation_weight):
     """
     ## Add a tf.function decorator to loss & gradient computation
@@ -230,7 +231,7 @@ def compute_loss_and_grads(feature_extractor,
                             content_layer_name,
                             content_weight,
                             style_layer_names,
-                            style_weights,
+                            style_weight,
                             total_variation_weight)
     grads = tape.gradient(loss, combination_image)
     return loss, grads
@@ -253,7 +254,7 @@ def neural_style_transfer(model,
                           content_layer_name,
                           content_weight,
                           style_layer_names,
-                          style_weights,
+                          style_weight,
                           total_variation_weight,
                           result_prefix,
                           init_random=True):
@@ -283,10 +284,8 @@ def neural_style_transfer(model,
             content_layer_name,
             content_weight,
             style_layer_names,
-            style_weights,
+            style_weight,
             total_variation_weight)
-        grads = [(tf.clip_by_value(grad, -5.0, 5.0))
-                 for grad in grads]
         optimizer.apply_gradients([(grads, combination_image)])
         if i % 100 == 0:
             logging.info("Iteration %d: loss=%.2f" % (i, loss))
@@ -304,7 +303,7 @@ def content_reconstructions(vgg_model):
         'content_layer_name': 'block2_conv2',
         'content_weight': 1,
         'style_layer_names': None,
-        'style_weights': None,
+        'style_weight': None,
         'total_variation_weight': 0,
         'result_prefix': 'content_reconstructions_block2_conv2',
         'init_random': True
@@ -319,7 +318,7 @@ def content_reconstructions(vgg_model):
         'content_layer_name': 'block4_conv2',
         'content_weight': 1,
         'style_layer_names': None,
-        'style_weights': None,
+        'style_weight': None,
         'total_variation_weight': 0,
         'result_prefix': 'content_reconstructions_block4_conv2',
         'init_random': True
@@ -334,12 +333,12 @@ def style_reconstructions(vgg_model):
     params = {
         'content_image_path': 'elephant.png',
         'style_image_path': 'starry_night.jpg',
-        'content_layer_name': 'block4_conv2',
-        'content_weight': 0,
+        'content_layer_name': None,
+        'content_weight': None,
         'style_layer_names': [
             "block1_conv1",
         ],
-        'style_weights': [1.0],
+        'style_weight': 1,
         'total_variation_weight': 0,
         'result_prefix': 'style_reconstructions_block1_conv1',
         'init_random': True
@@ -351,14 +350,14 @@ def style_reconstructions(vgg_model):
     params = {
         'content_image_path': 'elephant.png',
         'style_image_path': 'starry_night.jpg',
-        'content_layer_name': 'block4_conv2',
-        'content_weight': 0,
+        'content_layer_name': None,
+        'content_weight': None,
         'style_layer_names': [
             "block1_conv1",
             "block2_conv1",
             "block3_conv1",
         ],
-        'style_weights': [0.33, 0.33, 0.33],
+        'style_weight': 1,
         'total_variation_weight': 0,
         'result_prefix': 'style_reconstructions_block3_conv1',
         'init_random': True
@@ -370,8 +369,8 @@ def style_reconstructions(vgg_model):
     params = {
         'content_image_path': 'elephant.png',
         'style_image_path': 'starry_night.jpg',
-        'content_layer_name': 'block4_conv2',
-        'content_weight': 0,
+        'content_layer_name': None,
+        'content_weight': None,
         'style_layer_names': [
             "block1_conv1",
             "block2_conv1",
@@ -379,7 +378,7 @@ def style_reconstructions(vgg_model):
             "block4_conv1",
             "block5_conv1",
         ],
-        'style_weights': [0.2, 0.2, 0.2, 0.2, 0.2],
+        'style_weight': 1,
         'total_variation_weight': 0,
         'result_prefix': 'style_reconstructions_block5_conv1',
         'init_random': True
@@ -394,7 +393,7 @@ def nst(vgg_model):
         'content_image_path': 'elephant.png',
         'style_image_path': 'starry_night.jpg',
         'content_layer_name': 'block4_conv2',
-        'content_weight': 1e-3,
+        'content_weight': 1e-6,
         'style_layer_names': [
             "block1_conv1",
             "block2_conv1",
@@ -402,8 +401,8 @@ def nst(vgg_model):
             "block4_conv1",
             "block5_conv1",
         ],
-        'style_weights': [0.2, 0.2, 0.2, 0.2, 0.2],
-        'total_variation_weight': 1e-3,
+        'style_weight': 1e-5,
+        'total_variation_weight': 1e-6,
         'result_prefix': 'nst',
         'init_random': True
     }
@@ -413,12 +412,12 @@ def nst(vgg_model):
 
 def run():
     vgg_model = load_model()
-    # vis_img_filters(vgg_model)
-    # vis_feature_maps(vgg_model)
+    vis_img_filters(vgg_model)
+    vis_feature_maps(vgg_model)
 
     content_reconstructions(vgg_model)
-    # style_reconstructions(vgg_model)
-    # nst(vgg_model)
+    style_reconstructions(vgg_model)
+    nst(vgg_model)
 
 
 def main(_):
