@@ -7,36 +7,43 @@ compile/fit methods for image classification models, including:
     * Trainable params: 62,397,480
     * Non-trainable params: 19,136
     * batch_size=256, dtype=float32, epochs=90, 30min/epoch, GTX1060
-    * loss: 3.0642 - accuracy: 0.5754 - top_5_accuracy: 0.8072
+    * loss: 3.4680 - accuracy: 0.5954 - top_5_accuracy: 0.7324
+    * val_loss: 3.0642 - val_accuracy: 0.5754 - val_top_5_accuracy: 0.8072
   * ResNet18
     * Total params: 11,708,328
     * Trainable params: 11,698,600
     * Non-trainable params: 9,728
     * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
+    * loss: 2.7720 - accuracy: 0.6427 - top_5_accuracy: 0.8429
+    * val_loss: 2.6050 - val_accuracy: 0.6700 - val_top_5_accuracy: 0.8755
   * ResNet50
     * Total params: 25,636,712
     * Trainable params: 25,583,592
     * Non-trainable params: 53,120
     * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100
+    * loss: 2.4390 - accuracy: 0.7356 - top_5_accuracy: 0.8999
+    * val_loss: 2.3760 - val_accuracy: 0.7373 - val_top_5_accuracy: 0.9157
   * ResNet18V2
     * Total params: 11,700,648
     * Trainable params: 11,692,840
     * Non-trainable params: 7,808
     * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
-    * loss: 2.8414 - accuracy: 0.5771 - top_5_accuracy: 0.7967
-    * val_loss: 2.6135 - val_accuracy: 0.6187 - val_top_5_accuracy: 0.8402
+    * loss: 2.8414 - accuracy: 0.5777 - top_5_accuracy: 0.7967
+    * val_loss: 2.6130 - val_accuracy: 0.6187 - val_top_5_accuracy: 0.8403
   * ResNet50V2
     * Total params: 25,613,800
     * Trainable params: 25,568,360
     * Non-trainable params: 45,440
     * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100
+    * loss: 2.5177 - accuracy: 0.6495 - top_5_accuracy: 0.8491 
+    * val_loss: 2.3493 - val_accuracy: 0.6777 - val_top_5_accuracy: 0.8817
   * GoogLeNet
     * Total params: 7,027,672
     * Trainable params: 7,013,112
     * Non-trainable params: 14,560
     * batch_size=256, dtype=mixed_float16, epochs=90, 15min/epoch, TeslaV100
-    * loss: 2.8186 - accuracy: 0.6292 - top_5_accuracy: 0.8353
-    * val_loss: 2.5143 - val_accuracy: 0.6865 - val_top_5_accuracy: 0.8858
+    * loss: 2.8186 - accuracy: 0.6290 - top_5_accuracy: 0.8353
+    * val_loss: 2.5143 - val_accuracy: 0.6864 - val_top_5_accuracy: 0.8859
   * Inception
   * Inception-ResNet
   * Xception

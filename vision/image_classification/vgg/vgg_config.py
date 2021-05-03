@@ -23,7 +23,7 @@ _LR_WARMUP_EPOCHS = _LR_SCHEDULE[0][1]
 
 @dataclasses.dataclass
 class Vgg16ModelConfig(base_configs.ModelConfig):
-    """Configuration for the Vgg16 model."""
+    """Configuration for the Vgg model."""
     name: str = 'Vgg16'
     num_classes: int = 1000
     model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
