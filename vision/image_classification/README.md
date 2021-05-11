@@ -6,9 +6,9 @@ compile/fit methods for image classification models, including:
     * Total params: 62,416,616
     * Trainable params: 62,397,480
     * Non-trainable params: 19,136
-    * batch_size=256, dtype=mixed_float16, epochs=90, 30min/epoch, TeslaV100
-    * loss: 3.4680 - accuracy: 0.5954 - top_5_accuracy: 0.7324
-    * val_loss: 3.0642 - val_accuracy: 0.5754 - val_top_5_accuracy: 0.8072
+    * batch_size=256, dtype=mixed_float16, epochs=90, 5min/epoch, TeslaV100
+    * loss: 3.4691 - accuracy: 0.4957 - top_5_accuracy: 0.7323
+    * val_loss: 3.0748 - val_accuracy: 0.5704 - val_top_5_accuracy: 0.8056
   * ResNet18
     * Total params: 11,708,328
     * Trainable params: 11,698,600
