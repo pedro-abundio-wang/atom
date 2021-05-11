@@ -62,10 +62,14 @@ compile/fit methods for image classification models, including:
     * Total params: 1,248,424
     * Trainable params: 1,248,424
     * Non-trainable params: 0
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100    
+    * loss: 4.0646 - accuracy: 0.3217 - top_5_accuracy: 0.5492 
+    * val_loss: 3.7074 - val_accuracy: 0.3877 - val_top_5_accuracy: 0.6285
   * MobileNet
     * Total params: 4,253,864
     * Trainable params: 4,231,976
     * Non-trainable params: 21,888
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
   * EfficientNet
 
 ### ImageNet preparation

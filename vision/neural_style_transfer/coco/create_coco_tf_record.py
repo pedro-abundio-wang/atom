@@ -1,7 +1,5 @@
 r"""Convert raw COCO dataset to TFRecord for object_detection.
 
-https://cloud.google.com/tpu/docs/coco-setup
-
 Example usage:
     python create_coco_tf_record.py --logtostderr \
       --image_dir="${TRAIN_IMAGE_DIR}" \
@@ -28,8 +26,8 @@ import numpy as np
 import PIL.Image
 
 from pycocotools import mask
-from object_detection.utils import dataset_util
-from object_detection.utils import label_map_util
+from vision.object_detection.utils import dataset_util
+from vision.object_detection.utils import label_map_util
 
 import tensorflow as tf
 
