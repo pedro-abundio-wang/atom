@@ -1,7 +1,7 @@
-# ATOM
+# Image Classification
 
 ## Conda Environment
 
 conda env create -f environment.yml
 
-conda activate atom
+conda activate image-classification
