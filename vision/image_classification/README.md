@@ -6,7 +6,7 @@ compile/fit methods for image classification models, including:
     * Total params: 62,416,616
     * Trainable params: 62,397,480
     * Non-trainable params: 19,136
-    * batch_size=256, dtype=float32, epochs=90, 30min/epoch, GTX1060
+    * batch_size=256, dtype=mixed_float16, epochs=90, 30min/epoch, TeslaV100
     * loss: 3.4680 - accuracy: 0.5954 - top_5_accuracy: 0.7324
     * val_loss: 3.0642 - val_accuracy: 0.5754 - val_top_5_accuracy: 0.8072
   * ResNet18
@@ -35,7 +35,7 @@ compile/fit methods for image classification models, including:
     * Trainable params: 25,568,360
     * Non-trainable params: 45,440
     * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100
-    * loss: 2.5177 - accuracy: 0.6495 - top_5_accuracy: 0.8491 
+    * loss: 2.5177 - accuracy: 0.6495 - top_5_accuracy: 0.8491
     * val_loss: 2.3493 - val_accuracy: 0.6777 - val_top_5_accuracy: 0.8817
   * GoogLeNet
     * Total params: 7,027,672
@@ -44,6 +44,7 @@ compile/fit methods for image classification models, including:
     * batch_size=256, dtype=mixed_float16, epochs=90, 15min/epoch, TeslaV100
     * loss: 2.8186 - accuracy: 0.6290 - top_5_accuracy: 0.8353
     * val_loss: 2.5143 - val_accuracy: 0.6864 - val_top_5_accuracy: 0.8859
+  * Xception
   * Inception
   * Inception-ResNet
   * Xception
@@ -51,10 +52,16 @@ compile/fit methods for image classification models, including:
     * Total params: 138,407,208
     * Trainable params: 138,382,376
     * Non-trainable params: 24,832
+    * batch_size=256, dtype=mixed_float16, epochs=90, 40min/epoch, TeslaV100
+    * loss: 2.7647 - accuracy: 0.6609 - top_5_accuracy: 0.8555
+    * val_loss: 2.4864 - val_accuracy: 0.7121 - val_top_5_accuracy: 0.9005
   * Vgg19
     * Total params: 143,722,024
     * Trainable params: 143,694,632
     * Non-trainable params: 27,392
+    * batch_size=256, dtype=mixed_float16, epochs=90, 50min/epoch, TeslaV100
+    * loss: 2.7129 - accuracy: 0.6726 - top_5_accuracy: 0.8632
+    * val_loss: 2.4588 - val_accuracy: 0.7168 - val_top_5_accuracy: 0.9053
   * WideResNet
   * ResNeXt
   * ShuffleNet
