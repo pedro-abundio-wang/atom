@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 
-from vision.image_classification.alexnet import alexnet_model
+from vision.image_classification.origin.alexnet import alexnet_model
 
 
 def get_models() -> Mapping[str, tf.keras.Model]:

@@ -14,8 +14,7 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 
 from modeling.hyperparams import base_config
-from vision.image_classification import augment
-from vision.image_classification import preprocessing
+from vision.image_classification.origin import preprocessing, augment
 
 AUGMENTERS = {
     'autoaugment': augment.AutoAugment,

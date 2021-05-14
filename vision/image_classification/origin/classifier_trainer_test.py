@@ -22,10 +22,8 @@ import tensorflow as tf
 from tensorflow.python.distribute import combinations
 from tensorflow.python.distribute import strategy_combinations
 from utils.flags import core as flags_core
-from vision.image_classification import classifier_trainer
-from vision.image_classification import dataset_factory
-from vision.image_classification import test_utils
-from vision.image_classification.configs import base_configs
+from vision.image_classification.origin import classifier_trainer, dataset_factory, test_utils
+from vision.image_classification.origin.configs import base_configs
 
 classifier_trainer.define_classifier_flags()
 

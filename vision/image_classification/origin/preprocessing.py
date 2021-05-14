@@ -7,7 +7,7 @@ from __future__ import print_function
 import tensorflow as tf
 from typing import List, Optional, Text, Tuple
 
-from vision.image_classification import augment
+from vision.image_classification.origin import augment
 
 # Calculated from the ImageNet training set
 MEAN_RGB = (0.485 * 255, 0.456 * 255, 0.406 * 255)

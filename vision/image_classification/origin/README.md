@@ -81,7 +81,7 @@ compile/fit methods for image classification models, including:
 
 ### ImageNet preparation
 
-[README](./imagenet/README.md)
+[README](imagenetEADME.md)
 
 ### Running on multiple GPU hosts
 
@@ -93,7 +93,7 @@ You can also train these models on multiple hosts, each with GPUs, using
 The classifier trainer is a unified framework for running image classification
 models using Keras's compile/fit methods. Experiments should be provided in the
 form of YAML files, some examples are included within the configs/examples
-folder. Please see [configs/examples](./configs/examples) for more example
+folder. Please see [configs/examples](configsxamples) for more example
 configurations.
 
 The provided configuration files use a per replica batch size and is scaled

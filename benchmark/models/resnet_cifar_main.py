@@ -13,7 +13,7 @@ from utils.flags import core as flags_core
 from utils.logs import logger
 from utils.misc import distribution_utils
 from utils.misc import keras_utils
-from vision.image_classification.cifar import cifar10_preprocessing
+from vision.image_classification.origin.cifar import cifar10_preprocessing
 
 LR_SCHEDULE = [  # (multiplier, epoch to start) tuples
     (0.1, 91), (0.01, 136), (0.001, 182)

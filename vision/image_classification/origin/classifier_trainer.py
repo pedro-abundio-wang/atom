@@ -22,23 +22,18 @@ from utils import hyperparams_flags
 from utils.logs import logger
 from utils.misc import distribution_utils
 from utils.misc import keras_utils
-from vision.image_classification import callbacks as custom_callbacks
-from vision.image_classification import dataset_factory
-from vision.image_classification import optimizer_factory
-from vision.image_classification.configs import base_configs
-from vision.image_classification.configs import configs
+from vision.image_classification.origin import dataset_factory, callbacks as custom_callbacks, optimizer_factory
+from vision.image_classification.origin.configs import base_configs
+from vision.image_classification.origin.configs import configs
 from benchmark.models import resnet_common
 
-from vision.image_classification.alexnet import alexnet_model
-from vision.image_classification.resnet import resnet18_model
-from vision.image_classification.resnet import resnet50_model
-from vision.image_classification.inception import googlenet_model
-from vision.image_classification.resnet import resnet18v2_model
-from vision.image_classification.resnet import resnet50v2_model
-from vision.image_classification.vgg import vgg16_model
-from vision.image_classification.vgg import vgg19_model
-from vision.image_classification.squeeze import squeeze_model
-from vision.image_classification.mobile import mobilenet_model
+from vision.image_classification.origin.alexnet import alexnet_model
+from vision.image_classification.origin.inception import googlenet_model
+from vision.image_classification.origin.resnet import resnet18v2_model
+from vision.image_classification.origin.resnet import resnet50v2_model, resnet18_model, resnet50_model
+from vision.image_classification.origin.vgg import vgg16_model, vgg19_model
+from vision.image_classification.origin.squeeze import squeeze_model
+from vision.image_classification.origin.mobile import mobilenet_model
 
 
 def get_models() -> Mapping[str, tf.keras.Model]:

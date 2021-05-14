@@ -8,8 +8,8 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 
 from typing import Any, Dict, Text
-from vision.image_classification import learning_rate
-from vision.image_classification.configs import base_configs
+from vision.image_classification.origin import learning_rate
+from vision.image_classification.origin.configs import base_configs
 
 
 def build_optimizer(

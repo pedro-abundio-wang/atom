@@ -7,14 +7,14 @@ from __future__ import print_function
 
 import dataclasses
 
-from vision.image_classification import dataset_factory
-from vision.image_classification.configs import base_configs
-from vision.image_classification.alexnet import alexnet_config
-from vision.image_classification.resnet import resnet_config
-from vision.image_classification.inception import inception_config
-from vision.image_classification.vgg import vgg_config
-from vision.image_classification.squeeze import squeeze_config
-from vision.image_classification.mobile import mobilenet_config
+from vision.image_classification.origin import dataset_factory
+from vision.image_classification.origin.configs import base_configs
+from vision.image_classification.origin.alexnet import alexnet_config
+from vision.image_classification.origin.resnet import resnet_config
+from vision.image_classification.origin.inception import inception_config
+from vision.image_classification.origin.vgg import vgg_config
+from vision.image_classification.origin.squeeze import squeeze_config
+from vision.image_classification.origin.mobile import mobilenet_config
 
 
 @dataclasses.dataclass()

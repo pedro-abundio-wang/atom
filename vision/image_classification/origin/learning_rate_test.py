@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from vision.image_classification import learning_rate
+from vision.image_classification.origin import learning_rate
 
 
 class LearningRateTests(tf.test.TestCase):

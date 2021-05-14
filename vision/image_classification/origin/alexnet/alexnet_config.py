@@ -1,6 +1,6 @@
 # Lint as: python3
 # ==============================================================================
-"""Configuration definitions for Vgg losses, learning rates, and optimizers."""
+"""Configuration definitions for AlexNet losses, learning rates, and optimizers."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -9,7 +9,7 @@ from typing import Any, Mapping
 
 import dataclasses
 
-from vision.image_classification.configs import base_configs
+from vision.image_classification.origin.configs import base_configs
 
 
 _LR_SCHEDULE = [    # (multiplier, epoch to start) tuples
@@ -22,35 +22,9 @@ _LR_WARMUP_EPOCHS = _LR_SCHEDULE[0][1]
 
 
 @dataclasses.dataclass
-class Vgg16ModelConfig(base_configs.ModelConfig):
-    """Configuration for the Vgg model."""
-    name: str = 'Vgg16'
-    num_classes: int = 1000
-    model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
-        'num_classes': 1000,
-        'batch_size': None,
-    })
-    loss: base_configs.LossConfig = base_configs.LossConfig(
-        name='sparse_categorical_crossentropy')
-    optimizer: base_configs.OptimizerConfig = base_configs.OptimizerConfig(
-        name='momentum',
-        decay=0.9,
-        epsilon=0.001,
-        momentum=0.9,
-        moving_average_decay=None)
-    learning_rate: base_configs.LearningRateConfig = (
-        base_configs.LearningRateConfig(
-            name='piecewise_constant_with_warmup',
-            examples_per_epoch=1281167,
-            warmup_epochs=_LR_WARMUP_EPOCHS,
-            boundaries=_LR_BOUNDARIES,
-            multipliers=_LR_MULTIPLIERS))
-
-
-@dataclasses.dataclass
-class Vgg19ModelConfig(base_configs.ModelConfig):
-    """Configuration for the Vgg19 model."""
-    name: str = 'Vgg19'
+class AlexNetModelConfig(base_configs.ModelConfig):
+    """Configuration for the AlexNet model."""
+    name: str = 'AlexNet'
     num_classes: int = 1000
     model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
         'num_classes': 1000,

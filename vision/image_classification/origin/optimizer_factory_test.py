@@ -22,8 +22,8 @@ from __future__ import print_function
 import tensorflow as tf
 
 from absl.testing import parameterized
-from vision.image_classification import optimizer_factory
-from vision.image_classification.configs import base_configs
+from vision.image_classification.origin import optimizer_factory
+from vision.image_classification.origin.configs import base_configs
 
 
 class OptimizerFactoryTest(tf.test.TestCase, parameterized.TestCase):

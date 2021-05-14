@@ -23,7 +23,7 @@ from absl.testing import parameterized
 
 import tensorflow as tf
 
-from vision.image_classification import augment
+from vision.image_classification.origin import augment
 
 
 def get_dtype_test_cases():
@@ -49,7 +49,7 @@ class TransformsTest(parameterized.TestCase, tf.test.TestCase):
 
   def test_transform(self, dtype):
     image = tf.constant([[1, 2], [3, 4]], dtype=dtype)
-    self.assertAllEqual(augment.transform(image, transforms=[1]*8),
+    self.assertAllEqual(augment.transform(image, transforms=[1] * 8),
                         [[4, 4], [4, 4]])
 
   def disable_test_translate(self, dtype):

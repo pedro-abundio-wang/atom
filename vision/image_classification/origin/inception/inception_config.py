@@ -1,6 +1,6 @@
 # Lint as: python3
 # ==============================================================================
-"""Configuration definitions for AlexNet losses, learning rates, and optimizers."""
+"""Configuration definitions for Inception losses, learning rates, and optimizers."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -9,8 +9,7 @@ from typing import Any, Mapping
 
 import dataclasses
 
-from vision.image_classification.configs import base_configs
-
+from vision.image_classification.origin.configs import base_configs
 
 _LR_SCHEDULE = [    # (multiplier, epoch to start) tuples
     (1e-1, 5), (1e-2, 20), (1e-3, 40), (1e-4, 60), (1e-5, 80)
@@ -22,9 +21,9 @@ _LR_WARMUP_EPOCHS = _LR_SCHEDULE[0][1]
 
 
 @dataclasses.dataclass
-class AlexNetModelConfig(base_configs.ModelConfig):
-    """Configuration for the AlexNet model."""
-    name: str = 'AlexNet'
+class GooglenetModelConfig(base_configs.ModelConfig):
+    """Configuration for the GoogLeNet model."""
+    name: str = 'GoogLeNet'
     num_classes: int = 1000
     model_params: Mapping[str, Any] = dataclasses.field(default_factory=lambda: {
         'num_classes': 1000,
