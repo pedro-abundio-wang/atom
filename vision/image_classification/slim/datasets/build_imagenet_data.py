@@ -105,7 +105,7 @@ flags.DEFINE_integer('train_shards', 1024,
 flags.DEFINE_integer('validation_shards', 128,
                      'Number of shards in validation TFRecord files.')
 
-flags.DEFINE_integer('num_threads', 32,
+flags.DEFINE_integer('num_threads', 16,
                      'Number of threads to preprocess the images.')
 
 # The labels file contains a list of valid labels are held in this file.
