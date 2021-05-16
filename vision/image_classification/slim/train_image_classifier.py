@@ -11,10 +11,10 @@ from absl import logging
 import tensorflow as tf
 import tf_slim as slim
 
-from datasets import dataset_factory
-from deployment import model_deploy
-from nets import nets_factory
-from preprocessing import preprocessing_factory
+from vision.image_classification.slim.datasets import dataset_factory
+from vision.image_classification.slim.deployment import model_deploy
+from vision.image_classification.slim.nets import nets_factory
+from vision.image_classification.slim.preprocessing import preprocessing_factory
 
 
 def define_common_flags():
@@ -166,7 +166,7 @@ def define_dataset_flags():
         'dataset_split_name', 'train', 'The name of the train/test split.')
 
     flags.DEFINE_string(
-        'dataset_dir', None, 'The directory where the dataset files are stored.')
+        'dataset_dir', '/data/imagenet/tfrecord', 'The directory where the dataset files are stored.')
 
     flags.DEFINE_integer(
         'labels_offset', 0,
@@ -520,7 +520,6 @@ def main(_):
                 FLAGS.moving_average_decay, global_step)
         else:
             moving_average_variables, variable_averages = None, None
-
 
         #########################################
         # Configure the optimization procedure. #

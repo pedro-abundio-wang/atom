@@ -1,20 +1,19 @@
-# Copyright 2016 Google Inc. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Converts ImageNet data to TFRecords file format with Example protos.
 
-The raw ImageNet data set is expected to reside in JPEG files located in the
+The training data set consists of 1000 sub-directories (i.e. labels)
+each containing 1200 JPEG images for a total of 1.2M JPEG images.
+The raw data is expected to reside in JPEG files located in the
+following directory structure.
+
+  data_dir/nXXXXXXXX/nXXXXXXXX_YYYY.JPEG
+  ...
+
+where 'nXXXXXXXX' is the unique synset label associated with
+these images.
+
+The validation data set consists of 1000 sub-directories (i.e. labels)
+each containing 50 JPEG images for a total of 50K JPEG images.
+The raw data is expected to reside in JPEG files located in the
 following directory structure.
 
   data_dir/n01440764/ILSVRC2012_val_00000293.JPEG
@@ -23,12 +22,6 @@ following directory structure.
 
 where 'n01440764' is the unique synset label associated with
 these images.
-
-The training data set consists of 1000 sub-directories (i.e. labels)
-each containing 1200 JPEG images for a total of 1.2M JPEG images.
-
-The evaluation data set consists of 1000 sub-directories (i.e. labels)
-each containing 50 JPEG images for a total of 50K JPEG images.
 
 This TensorFlow script converts the training and evaluation data into
 a sharded data set consisting of 1024 and 128 TFRecord files, respectively.
@@ -45,8 +38,8 @@ and
   ...
   validation_directory/validation-00127-of-00128
 
-Each validation TFRecord file contains ~390 records. Each training TFREcord
-file contains ~1250 records. Each record within the TFRecord file is a
+Each training TFRecord file contains ~1250 records. Each validation TFREcord
+file contains ~390 records. Each record within the TFRecord file is a
 serialized Example proto. The Example proto contains the following fields:
 
   image/encoded: string containing JPEG encoded image in RGB colorspace
@@ -65,13 +58,13 @@ serialized Example proto. The Example proto contains the following fields:
   image/class/text: string specifying the human-readable version of the label
     e.g. 'red fox, Vulpes vulpes'
 
-  image/object/bbox/xmin: list of integers specifying the 0+ human annotated
+  image/object/bbox/xmin: list of integers specifying the human annotated
     bounding boxes
-  image/object/bbox/xmax: list of integers specifying the 0+ human annotated
+  image/object/bbox/xmax: list of integers specifying the human annotated
     bounding boxes
-  image/object/bbox/ymin: list of integers specifying the 0+ human annotated
+  image/object/bbox/ymin: list of integers specifying the human annotated
     bounding boxes
-  image/object/bbox/ymax: list of integers specifying the 0+ human annotated
+  image/object/bbox/ymax: list of integers specifying the human annotated
     bounding boxes
   image/object/bbox/label: integer specifying the index in a classification
     layer. The label ranges from [1, 1000] where 0 is not used. Note this is
@@ -92,25 +85,28 @@ import random
 import sys
 import threading
 
+from absl import app
+from absl import flags
+
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 
 
-tf.app.flags.DEFINE_string('train_directory', '/tmp/',
-                           'Training data directory')
-tf.app.flags.DEFINE_string('validation_directory', '/tmp/',
-                           'Validation data directory')
-tf.app.flags.DEFINE_string('output_directory', '/tmp/',
-                           'Output data directory')
+flags.DEFINE_string('train_directory', '/tmp/',
+                    'Training data directory')
+flags.DEFINE_string('validation_directory', '/tmp/',
+                    'Validation data directory')
+flags.DEFINE_string('output_directory', '/tmp/',
+                    'Output data directory')
 
-tf.app.flags.DEFINE_integer('train_shards', 1024,
-                            'Number of shards in training TFRecord files.')
-tf.app.flags.DEFINE_integer('validation_shards', 128,
-                            'Number of shards in validation TFRecord files.')
+flags.DEFINE_integer('train_shards', 1024,
+                     'Number of shards in training TFRecord files.')
+flags.DEFINE_integer('validation_shards', 128,
+                     'Number of shards in validation TFRecord files.')
 
-tf.app.flags.DEFINE_integer('num_threads', 8,
-                            'Number of threads to preprocess the images.')
+flags.DEFINE_integer('num_threads', 32,
+                     'Number of threads to preprocess the images.')
 
 # The labels file contains a list of valid labels are held in this file.
 # Assumes that the file contains entries as such:
@@ -120,9 +116,9 @@ tf.app.flags.DEFINE_integer('num_threads', 8,
 # where each line corresponds to a label expressed as a synset. We map
 # each synset contained in the file to an integer (based on the alphabetical
 # ordering). See below for details.
-tf.app.flags.DEFINE_string('labels_file',
-                           'imagenet_lsvrc_2015_synsets.txt',
-                           'Labels file')
+flags.DEFINE_string('labels_file',
+                    'imagenet_lsvrc_2015_synsets.txt',
+                    'Labels file')
 
 # This file containing mapping from synset to human-readable label.
 # Assumes each line of the file looks like:
@@ -133,9 +129,9 @@ tf.app.flags.DEFINE_string('labels_file',
 #
 # where each line corresponds to a unique mapping. Note that each line is
 # formatted as <synset>\t<human readable label>.
-tf.app.flags.DEFINE_string('imagenet_metadata_file',
-                           'imagenet_metadata.txt',
-                           'ImageNet metadata file')
+flags.DEFINE_string('imagenet_metadata_file',
+                    'imagenet_metadata.txt',
+                    'ImageNet metadata file')
 
 # This file is the output of process_bounding_box.py
 # Assumes each line of the file looks like:
@@ -149,12 +145,11 @@ tf.app.flags.DEFINE_string('imagenet_metadata_file',
 #
 # Note that there might exist mulitple bounding box annotations associated
 # with an image file.
-tf.app.flags.DEFINE_string('bounding_box_file',
-                           './imagenet_2012_bounding_boxes.csv',
-                           'Bounding box file')
+flags.DEFINE_string('bounding_box_file',
+                    './imagenet_2012_bounding_boxes.csv',
+                    'Bounding box file')
 
-FLAGS = tf.app.flags.FLAGS
-
+FLAGS = flags.FLAGS
 
 def _int64_feature(value):
   """Wrapper for inserting int64 features into Example proto."""
@@ -231,31 +226,34 @@ class ImageCoder(object):
 
   def __init__(self):
     # Create a single Session to run all image coding calls.
-    self._sess = tf.Session()
+    self._sess = tf.compat.v1.Session()
 
     # Initializes function that converts PNG to JPEG data.
-    self._png_data = tf.placeholder(dtype=tf.string)
+    self._png_data = tf.compat.v1.placeholder(dtype=tf.string)
     image = tf.image.decode_png(self._png_data, channels=3)
     self._png_to_jpeg = tf.image.encode_jpeg(image, format='rgb', quality=100)
 
     # Initializes function that converts CMYK JPEG data to RGB JPEG data.
-    self._cmyk_data = tf.placeholder(dtype=tf.string)
+    self._cmyk_data = tf.compat.v1.placeholder(dtype=tf.string)
     image = tf.image.decode_jpeg(self._cmyk_data, channels=0)
     self._cmyk_to_rgb = tf.image.encode_jpeg(image, format='rgb', quality=100)
 
     # Initializes function that decodes RGB JPEG data.
-    self._decode_jpeg_data = tf.placeholder(dtype=tf.string)
+    self._decode_jpeg_data = tf.compat.v1.placeholder(dtype=tf.string)
     self._decode_jpeg = tf.image.decode_jpeg(self._decode_jpeg_data, channels=3)
 
   def png_to_jpeg(self, image_data):
+    """Converts a PNG compressed image to a JPEG Tensor."""
     return self._sess.run(self._png_to_jpeg,
                           feed_dict={self._png_data: image_data})
 
   def cmyk_to_rgb(self, image_data):
+    """Converts a CMYK image to RGB Tensor."""
     return self._sess.run(self._cmyk_to_rgb,
                           feed_dict={self._cmyk_data: image_data})
 
   def decode_jpeg(self, image_data):
+    """Decodes a JPEG image."""
     image = self._sess.run(self._decode_jpeg,
                            feed_dict={self._decode_jpeg_data: image_data})
     assert len(image.shape) == 3
@@ -273,7 +271,7 @@ def _is_png(filename):
     boolean indicating if the image is a PNG.
   """
   # File list from:
-  # https://groups.google.com/forum/embed/?place=forum/torch7#!topic/torch7/fOSTXHIESSU
+  # https://github.com/cytsai/ilsvrc-cmyk-image-list
   return 'n02105855_2933.JPEG' in filename
 
 
@@ -314,7 +312,7 @@ def _process_image(filename, coder):
     width: integer, image width in pixels.
   """
   # Read the image file.
-  image_data = tf.gfile.GFile(filename, 'r').read()
+  image_data = tf.io.gfile.GFile(filename, 'r').read()
 
   # Clean the dirty data.
   if _is_png(filename):
@@ -375,7 +373,7 @@ def _process_image_files_batch(coder, thread_index, ranges, name, filenames,
     shard = thread_index * num_shards_per_batch + s
     output_filename = '%s-%.5d-of-%.5d' % (name, shard, num_shards)
     output_file = os.path.join(FLAGS.output_directory, output_filename)
-    writer = tf.python_io.TFRecordWriter(output_file)
+    writer = tf.compat.v1.python_io.TFRecordWriter(output_file)
 
     shard_counter = 0
     files_in_shard = np.arange(shard_ranges[s], shard_ranges[s + 1], dtype=int)
@@ -498,7 +496,7 @@ def _find_image_files(data_dir, labels_file):
   """
   print('Determining list of input files and labels from %s.' % data_dir)
   challenge_synsets = [
-      l.strip() for l in tf.gfile.GFile(labels_file, 'r').readlines()
+      l.strip() for l in tf.io.gfile.GFile(labels_file, 'r').readlines()
   ]
 
   labels = []
@@ -511,7 +509,7 @@ def _find_image_files(data_dir, labels_file):
   # Construct the list of JPEG files and labels.
   for synset in challenge_synsets:
     jpeg_file_path = '%s/%s/*.JPEG' % (data_dir, synset)
-    matching_files = tf.gfile.Glob(jpeg_file_path)
+    matching_files = tf.io.gfile.glob(jpeg_file_path)
 
     labels.extend([label_index] * len(matching_files))
     synsets.extend([synset] * len(matching_files))
@@ -622,7 +620,7 @@ def _build_synset_lookup(imagenet_metadata_file):
     Dictionary of synset to human labels, such as:
       'n02119022' --> 'red fox, Vulpes vulpes'
   """
-  lines = tf.gfile.GFile(imagenet_metadata_file, 'r').readlines()
+  lines = tf.io.gfile.GFile(imagenet_metadata_file, 'r').readlines()
   synset_to_human = {}
   for l in lines:
     if l:
@@ -656,7 +654,7 @@ def _build_bounding_box_lookup(bounding_box_file):
     Dictionary mapping image file names to a list of bounding boxes. This list
     contains 0+ bounding boxes.
   """
-  lines = tf.gfile.GFile(bounding_box_file, 'r').readlines()
+  lines = tf.io.gfile.GFile(bounding_box_file, 'r').readlines()
   images_to_bboxes = {}
   num_bbox = 0
   num_image = 0
@@ -682,7 +680,7 @@ def _build_bounding_box_lookup(bounding_box_file):
   return images_to_bboxes
 
 
-def main(unused_argv):
+def main(_):
   assert not FLAGS.train_shards % FLAGS.num_threads, (
       'Please make the FLAGS.num_threads commensurate with FLAGS.train_shards')
   assert not FLAGS.validation_shards % FLAGS.num_threads, (
@@ -702,4 +700,5 @@ def main(unused_argv):
 
 
 if __name__ == '__main__':
-  tf.app.run()
+  tf.compat.v1.disable_v2_behavior()
+  app.run(main)
