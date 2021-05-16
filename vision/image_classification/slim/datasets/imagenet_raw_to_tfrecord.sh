@@ -31,7 +31,8 @@ if [ -z "$1" ]; then
   exit
 fi
 
-IMAGENET_HOME="/data/imagenet"
+# IMAGENET_HOME="/data/imagenet"
+IMAGENET_HOME="$1"
 
 # Download the ImageNet data.
 LABELS_FILE="${IMAGENET_HOME}/imagenet_lsvrc_2015_synsets.txt"

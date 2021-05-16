@@ -105,7 +105,7 @@ flags.DEFINE_integer('train_shards', 1024,
 flags.DEFINE_integer('validation_shards', 128,
                      'Number of shards in validation TFRecord files.')
 
-flags.DEFINE_integer('num_threads', 32,
+flags.DEFINE_integer('num_threads', 4,
                      'Number of threads to preprocess the images.')
 
 # The labels file contains a list of valid labels are held in this file.
@@ -523,9 +523,14 @@ def _find_image_files(data_dir, labels_file):
   # Shuffle the ordering of all image files in order to guarantee
   # random ordering of the images with respect to label in the
   # saved TFRecord files. Make the randomization repeatable.
-  shuffled_index = range(len(filenames))
   random.seed(12345)
-  random.shuffle(shuffled_index)
+
+  def make_shuffle_idx(n):
+      order = list(range(n))
+      random.shuffle(order)
+      return order
+
+  shuffled_index = make_shuffle_idx(len(filenames))
 
   filenames = [filenames[i] for i in shuffled_index]
   synsets = [synsets[i] for i in shuffled_index]
