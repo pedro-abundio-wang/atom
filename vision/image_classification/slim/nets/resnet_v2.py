@@ -1,17 +1,3 @@
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Contains definitions for the preactivation form of Residual Networks.
 
 Residual networks (ResNets) were originally proposed in:
@@ -28,7 +14,7 @@ The key difference of the full preactivation 'v2' variant compared to the
 
 Typical use:
 
-   from tf_slim.nets import resnet_v2
+   from nets import resnet_v2
 
 ResNet-101 for image classification into 1000 classes:
 
@@ -50,10 +36,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tf_slim as slim
 
-from nets import resnet_utils
+from vision.image_classification.slim.nets import resnet_utils
 
 resnet_arg_scope = resnet_utils.resnet_arg_scope
 
@@ -83,8 +69,8 @@ def bottleneck(inputs, depth, depth_bottleneck, stride, rate=1,
   Returns:
     The ResNet unit's output.
   """
-  with tf.variable_scope(scope, 'bottleneck_v2', [inputs]) as sc:
-    depth_in = slim.utils.last_dimension(inputs.get_shape(), min_rank=4)
+  with tf.compat.v1.variable_scope(scope, 'bottleneck_v2', [inputs]) as sc:
+    depth_in = slim.layers.utils.last_dimension(inputs.get_shape(), min_rank=4)
     preact = slim.batch_norm(inputs, activation_fn=tf.nn.relu, scope='preact')
     if depth == depth_in:
       shortcut = resnet_utils.subsample(inputs, stride, 'shortcut')
@@ -103,9 +89,9 @@ def bottleneck(inputs, depth, depth_bottleneck, stride, rate=1,
 
     output = shortcut + residual
 
-    return slim.utils.collect_named_outputs(outputs_collections,
-                                            sc.name,
-                                            output)
+    return slim.layers.utils.collect_named_outputs(outputs_collections,
+                                                   sc.name,
+                                                   output)
 
 
 def resnet_v2(inputs,
@@ -180,7 +166,7 @@ def resnet_v2(inputs,
   Raises:
     ValueError: If the target output_stride is not valid.
   """
-  with tf.variable_scope(
+  with tf.compat.v1.variable_scope(
       scope, 'resnet_v2', [inputs], reuse=reuse) as sc:
     end_points_collection = sc.original_name_scope + '_end_points'
     with slim.arg_scope([slim.conv2d, bottleneck,
@@ -206,7 +192,7 @@ def resnet_v2(inputs,
         # Appendix of [2].
         net = slim.batch_norm(net, activation_fn=tf.nn.relu, scope='postnorm')
         # Convert end_points_collection into a dictionary of end_points.
-        end_points = slim.utils.convert_collection_to_dict(
+        end_points = slim.layers.utils.convert_collection_to_dict(
             end_points_collection)
 
         if global_pool:

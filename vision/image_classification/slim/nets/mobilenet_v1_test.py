@@ -1,17 +1,3 @@
-# Copyright 2017 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# =============================================================================
 """Tests for MobileNet v1."""
 
 from __future__ import absolute_import
@@ -19,10 +5,10 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tf_slim as slim
 
-from nets import mobilenet_v1
+from vision.image_classification.slim.nets import mobilenet_v1
 
 
 class MobilenetV1Test(tf.test.TestCase):
@@ -418,13 +404,13 @@ class MobilenetV1Test(tf.test.TestCase):
                          [batch_size, 4, 4, 1024])
 
   def testUnknownImageShape(self):
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
     batch_size = 2
     height, width = 224, 224
     num_classes = 1000
     input_np = np.random.uniform(0, 1, (batch_size, height, width, 3))
     with self.test_session() as sess:
-      inputs = tf.placeholder(
+      inputs = tf.compat.v1.placeholder(
           tf.float32, shape=(batch_size, None, None, 3))
       logits, end_points = mobilenet_v1.mobilenet_v1(inputs, num_classes)
       self.assertTrue(logits.op.name.startswith('MobilenetV1/Logits'))
@@ -432,18 +418,18 @@ class MobilenetV1Test(tf.test.TestCase):
                            [batch_size, num_classes])
       pre_pool = end_points['Conv2d_13_pointwise']
       feed_dict = {inputs: input_np}
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       pre_pool_out = sess.run(pre_pool, feed_dict=feed_dict)
       self.assertListEqual(list(pre_pool_out.shape), [batch_size, 7, 7, 1024])
 
   def testGlobalPoolUnknownImageShape(self):
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
     batch_size = 1
     height, width = 250, 300
     num_classes = 1000
     input_np = np.random.uniform(0, 1, (batch_size, height, width, 3))
     with self.test_session() as sess:
-      inputs = tf.placeholder(
+      inputs = tf.compat.v1.placeholder(
           tf.float32, shape=(batch_size, None, None, 3))
       logits, end_points = mobilenet_v1.mobilenet_v1(inputs, num_classes,
                                                      global_pool=True)
@@ -452,7 +438,7 @@ class MobilenetV1Test(tf.test.TestCase):
                            [batch_size, num_classes])
       pre_pool = end_points['Conv2d_13_pointwise']
       feed_dict = {inputs: input_np}
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       pre_pool_out = sess.run(pre_pool, feed_dict=feed_dict)
       self.assertListEqual(list(pre_pool_out.shape), [batch_size, 8, 10, 1024])
 
@@ -461,7 +447,7 @@ class MobilenetV1Test(tf.test.TestCase):
     height, width = 224, 224
     num_classes = 1000
 
-    inputs = tf.placeholder(tf.float32, (None, height, width, 3))
+    inputs = tf.compat.v1.placeholder(tf.float32, (None, height, width, 3))
     logits, _ = mobilenet_v1.mobilenet_v1(inputs, num_classes)
     self.assertTrue(logits.op.name.startswith('MobilenetV1/Logits'))
     self.assertListEqual(logits.get_shape().as_list(),
@@ -469,7 +455,7 @@ class MobilenetV1Test(tf.test.TestCase):
     images = tf.random.uniform((batch_size, height, width, 3))
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       output = sess.run(logits, {inputs: images.eval()})
       self.assertEquals(output.shape, (batch_size, num_classes))
 
@@ -484,7 +470,7 @@ class MobilenetV1Test(tf.test.TestCase):
     predictions = tf.argmax(input=logits, axis=1)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       output = sess.run(predictions)
       self.assertEquals(output.shape, (batch_size,))
 
@@ -502,7 +488,7 @@ class MobilenetV1Test(tf.test.TestCase):
     predictions = tf.argmax(input=logits, axis=1)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       output = sess.run(predictions)
       self.assertEquals(output.shape, (eval_batch_size,))
 
@@ -514,7 +500,7 @@ class MobilenetV1Test(tf.test.TestCase):
                                           spatial_squeeze=False)
 
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       logits_out = sess.run(logits)
       self.assertListEqual(list(logits_out.shape), [1, 1, 1, num_classes])
 
@@ -532,4 +518,5 @@ class MobilenetV1Test(tf.test.TestCase):
     self.assertIn('is_training', sc[slim.arg_scope_func_key(slim.batch_norm)])
 
 if __name__ == '__main__':
+  tf.compat.v1.disable_v2_behavior()
   tf.test.main()

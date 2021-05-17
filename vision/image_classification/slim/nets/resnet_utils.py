@@ -1,17 +1,3 @@
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Contains building blocks for various versions of Residual Networks.
 
 Residual networks (ResNets) were proposed in:
@@ -38,7 +24,7 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tf_slim as slim
 
 
@@ -179,7 +165,7 @@ def stack_blocks_dense(net, blocks, output_stride=None,
   rate = 1
 
   for block in blocks:
-    with tf.variable_scope(block.scope, 'block', [net]) as sc:
+    with tf.compat.v1.variable_scope(block.scope, 'block', [net]) as sc:
       block_stride = 1
       for i, unit in enumerate(block.args):
         if store_non_strided_activations and i == len(block.args) - 1:
@@ -187,7 +173,7 @@ def stack_blocks_dense(net, blocks, output_stride=None,
           block_stride = unit.get('stride', 1)
           unit = dict(unit, stride=1)
 
-        with tf.variable_scope('unit_%d' % (i + 1), values=[net]):
+        with tf.compat.v1.variable_scope('unit_%d' % (i + 1), values=[net]):
           # If we have reached the target output_stride, then we need to employ
           # atrous convolution with stride=1 and multiply the atrous rate by the
           # current unit's stride for use in subsequent layers.
@@ -202,7 +188,7 @@ def stack_blocks_dense(net, blocks, output_stride=None,
               raise ValueError('The target output_stride cannot be reached.')
 
       # Collect activations at the block's end before performing subsampling.
-      net = slim.utils.collect_named_outputs(outputs_collections, sc.name, net)
+      net = slim.layers.utils.collect_named_outputs(outputs_collections, sc.name, net)
 
       # Subsampling of the block's output activations.
       if output_stride is not None and current_stride == output_stride:
@@ -226,7 +212,7 @@ def resnet_arg_scope(
     batch_norm_scale=True,
     activation_fn=tf.nn.relu,
     use_batch_norm=True,
-    batch_norm_updates_collections=tf.GraphKeys.UPDATE_OPS):
+    batch_norm_updates_collections=tf.compat.v1.GraphKeys.UPDATE_OPS):
   """Defines the default ResNet arg scope.
 
   TODO(gpapan): The batch-normalization related default values above are

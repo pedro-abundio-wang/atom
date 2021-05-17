@@ -1,34 +1,19 @@
-# Copyright 2018 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Validate mobilenet_v1 with options for quantization."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from absl import app
+from absl import flags
+
 import math
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tf_slim as slim
 
-from tensorflow.contrib import quantize as contrib_quantize
-
-from datasets import dataset_factory
-from nets import mobilenet_v1
-from preprocessing import preprocessing_factory
-
-flags = tf.app.flags
+from vision.image_classification.slim.datasets import dataset_factory
+from vision.image_classification.slim.nets import mobilenet_v1
+from vision.image_classification.slim.preprocessing import preprocessing_factory
 
 flags.DEFINE_string('master', '', 'Session master')
 flags.DEFINE_integer('batch_size', 250, 'Batch size')
@@ -73,7 +58,7 @@ def imagenet_input(is_training):
 
   image = image_preprocessing_fn(image, FLAGS.image_size, FLAGS.image_size)
 
-  images, labels = tf.train.batch(
+  images, labels = tf.compat.v1.train.batch(
       tensors=[image, label],
       batch_size=FLAGS.batch_size,
       num_threads=4,
@@ -94,10 +79,10 @@ def metrics(logits, labels):
   labels = tf.squeeze(labels)
   names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
       'Accuracy':
-          tf.metrics.accuracy(
+          tf.compat.v1.metrics.accuracy(
               tf.argmax(input=logits, axis=1), labels),
       'Recall_5':
-          tf.metrics.recall_at_k(labels, logits, 5),
+          tf.compat.v1.metrics.recall_at_k(labels, logits, 5),
   })
   for name, value in names_to_values.iteritems():
     slim.summaries.add_scalar_summary(
@@ -128,7 +113,7 @@ def build_model():
           num_classes=FLAGS.num_classes)
 
     if FLAGS.quantize:
-      contrib_quantize.create_eval_graph()
+      pass
 
     eval_ops = metrics(logits, labels)
 
@@ -148,9 +133,10 @@ def eval_model():
         eval_op=eval_ops)
 
 
-def main(unused_arg):
+def main(_):
   eval_model()
 
 
 if __name__ == '__main__':
-  tf.app.run(main)
+  tf.compat.v1.disable_v2_behavior()
+  app.run(main)

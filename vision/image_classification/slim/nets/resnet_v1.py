@@ -1,17 +1,3 @@
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Contains definitions for the original form of Residual Networks.
 
 The 'v1' residual networks (ResNets) implemented in this module were proposed
@@ -34,7 +20,7 @@ units.
 
 Typical use:
 
-   from tf_slim.nets import resnet_v1
+   from nets import resnet_v1
 
 ResNet-101 for image classification into 1000 classes:
 
@@ -56,11 +42,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tf_slim as slim
 
-from nets import resnet_utils
-
+from vision.image_classification.slim.nets import resnet_utils
 
 resnet_arg_scope = resnet_utils.resnet_arg_scope
 
@@ -76,14 +61,8 @@ class NoOpScope(object):
 
 
 @slim.add_arg_scope
-def bottleneck(inputs,
-               depth,
-               depth_bottleneck,
-               stride,
-               rate=1,
-               outputs_collections=None,
-               scope=None,
-               use_bounded_activations=False):
+def bottleneck(inputs, depth, depth_bottleneck, stride, rate=1,
+               outputs_collections=None, scope=None, use_bounded_activations=False):
   """Bottleneck residual unit variant with BN after convolutions.
 
   This is the original residual unit proposed in [1]. See Fig. 1(a) of [2] for
@@ -108,8 +87,8 @@ def bottleneck(inputs,
   Returns:
     The ResNet unit's output.
   """
-  with tf.variable_scope(scope, 'bottleneck_v1', [inputs]) as sc:
-    depth_in = slim.utils.last_dimension(inputs.get_shape(), min_rank=4)
+  with tf.compat.v1.variable_scope(scope, 'bottleneck_v1', [inputs]) as sc:
+    depth_in = slim.layers.utils.last_dimension(inputs.get_shape(), min_rank=4)
     if depth == depth_in:
       shortcut = resnet_utils.subsample(inputs, stride, 'shortcut')
     else:
@@ -134,9 +113,9 @@ def bottleneck(inputs,
     else:
       output = tf.nn.relu(shortcut + residual)
 
-    return slim.utils.collect_named_outputs(outputs_collections,
-                                            sc.name,
-                                            output)
+    return slim.layers.utils.collect_named_outputs(outputs_collections,
+                                                   sc.name,
+                                                   output)
 
 
 def resnet_v1(inputs,
@@ -218,7 +197,7 @@ def resnet_v1(inputs,
   Raises:
     ValueError: If the target output_stride is not valid.
   """
-  with tf.variable_scope(
+  with tf.compat.v1.variable_scope(
       scope, 'resnet_v1', [inputs], reuse=reuse) as sc:
     end_points_collection = sc.original_name_scope + '_end_points'
     with slim.arg_scope([slim.conv2d, bottleneck,
@@ -237,7 +216,7 @@ def resnet_v1(inputs,
         net = resnet_utils.stack_blocks_dense(net, blocks, output_stride,
                                               store_non_strided_activations)
         # Convert end_points_collection into a dictionary of end_points.
-        end_points = slim.utils.convert_collection_to_dict(
+        end_points = slim.layers.utils.convert_collection_to_dict(
             end_points_collection)
 
         if global_pool:
