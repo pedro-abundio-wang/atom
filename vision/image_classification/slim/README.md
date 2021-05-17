@@ -14,16 +14,6 @@ these datasets, as we demonstrate below. We've also included a
 which provides working examples of how to use TF-Slim for image classification.
 For developing or modifying your own models, see also the [main TF-Slim page](https://github.com/google-research/tf-slim/tree/master/tf_slim).
 
-## Contacts
-
-Maintainers of TF-slim:
-* Sergio Guadarrama, github: [sguada](https://github.com/sguada)
-
-## Citation
-"TensorFlow-Slim image classification model library"
-N. Silberman and S. Guadarrama, 2016.
-https://github.com/tensorflow/models/tree/master/research/slim
-
 ## Table of contents
 
 <a href="#Install">Installation and setup</a><br>
@@ -50,33 +40,6 @@ raising any errors.
 ```
 python -c "import tf_slim as slim; eval = slim.evaluation.evaluate_once"
 ```
-
-## Installing the TF-slim image models library
-
-To use TF-Slim for image classification, you also have to install
-the [TF-Slim image models library](https://github.com/tensorflow/models/tree/master/research/slim),
-which is not part of the core TF library.
-To do this, check out the
-[tensorflow/models](https://github.com/tensorflow/models/) repository as follows:
-
-```bash
-cd $HOME/workspace
-git clone https://github.com/tensorflow/models/
-```
-
-This will put the TF-Slim image models library in `$HOME/workspace/models/research/slim`.
-(It will also create a directory called
-[models/inception](https://github.com/tensorflow/models/tree/master/research/inception),
-which contains an older version of slim; you can safely ignore this.)
-
-To verify that this has worked, execute the following commands; it should run
-without raising any errors.
-
-```
-cd $HOME/workspace/models/research/slim
-python -c "from nets import cifarnet; mynet = cifarnet.cifarnet"
-```
-
 
 # Preparing the datasets
 <a id='Data'></a>
@@ -126,9 +89,7 @@ You will also find the `$DATA_DIR/labels.txt` file which contains the mapping
 from integer labels to class names.
 
 You can use the same script to create the mnist, cifar10 and visualwakewords
-datasets. However, for ImageNet, you have to follow the instructions
-[here](https://github.com/tensorflow/models/blob/master/research/inception/README.md#getting-started).
-Note that you first have to sign up for an account at image-net.org. Also, the
+datasets. However, for ImageNet, you have to download data by yourself. Also, the
 download can take several hours, and could use up to 500GB.
 
 ## Creating a TF-Slim Dataset Descriptor.
@@ -151,14 +112,12 @@ TF-Slim
 is found below:
 
 ```python
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tf_slim as slim
-from datasets import flowers
-
-
+from vision.image_classification.slim.datasets import imagenet
 
 # Selects the 'validation' dataset.
-dataset = flowers.get_split('validation', DATA_DIR)
+dataset = imagenet.get_split('validation', "$DATA_DIR")
 
 # Creates a TF-Slim DataProvider which reads the dataset in the background
 # during both training and testing.
@@ -169,38 +128,21 @@ provider = slim.dataset_data_provider.DatasetDataProvider(dataset)
 
 Training a model with the ImageNet dataset is a common request. To facilitate
 working with the ImageNet dataset, we provide an automated script for
-downloading and processing the ImageNet dataset into the native TFRecord
-format.
+processing the ImageNet dataset into the native TFRecord format.
 
 The TFRecord format consists of a set of sharded files where each entry is a serialized `tf.Example` proto. Each `tf.Example` proto contains the ImageNet image (JPEG encoded) as well as metadata such as label and bounding box information.
 
 We provide a single [script](datasets/imagenet_raw_to_tfrecord.sh) for
-downloading and converting ImageNet data to TFRecord format. Downloading and
-preprocessing the data may take several hours (up to half a day) depending on
+converting ImageNet data to TFRecord format. Preprocessing the data may 
+take several hours (up to half a day) depending on 
 your network and computer speed. Please be patient.
-
-To begin, you will need to sign up for an account with [ImageNet]
-(http://image-net.org) to gain access to the data. Look for the sign up page,
-create an account and request an access key to download the data.
-
-After you have `USERNAME` and `PASSWORD`, you are ready to run our script. Make
-sure that your hard disk has at least 500 GB of free space for downloading and
-storing the data. Here we select `DATA_DIR=$HOME/imagenet-data` as such a
-location but feel free to edit accordingly.
-
-When you run the below script, please enter *USERNAME* and *PASSWORD* when
-prompted. This will occur at the very beginning. Once these values are entered,
-you will not need to interact with the script again.
 
 ```shell
 # location of where to place the ImageNet data
-DATA_DIR=$HOME/imagenet-data
-
-# build the preprocessing script.
-bazel build slim/download_and_convert_imagenet
+IMAGENET_HOME=/path/to/imagenet
 
 # run it
-bazel-bin/slim/download_and_convert_imagenet "${DATA_DIR}"
+imagenet_raw_to_tfrecord.sh "${IMAGENET_HOME}"
 ```
 
 The final line of the output script should read:
@@ -210,18 +152,17 @@ The final line of the output script should read:
 ```
 
 When the script finishes you will find 1024 and 128 training and validation
-files in the `DATA_DIR`. The files will match the patterns `train-????-of-1024`
+files in the `"${IMAGENET_HOME}/tfrecord-slim"`. The files will match the patterns `train-????-of-1024`
 and `validation-?????-of-00128`, respectively.
 
-[Congratulations!](https://www.youtube.com/watch?v=9bZkp7q19f0) You are now
-ready to train or evaluate with the ImageNet data set.
+Congratulations! You are now ready to train or evaluate with the ImageNet data set.
 
 # Pre-trained Models
 <a id='Pretrained'></a>
 
 Neural nets work best when they have many parameters, making them powerful
 function approximators.
-However, this  means they must be trained on very large datasets. Because
+However, this means they must be trained on very large datasets. Because
 training models from scratch can be a very computationally intensive process
 requiring days or even weeks, we provide various pre-trained models,
 as listed below. These CNNs have been trained on the
@@ -251,36 +192,31 @@ Model | TF-Slim File | Checkpoint | Top-1 Accuracy| Top-5 Accuracy |
 [ResNet V1 50](https://arxiv.org/abs/1512.03385)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v1.py)|[resnet_v1_50_2016_08_28.tar.gz](http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz)|75.2|92.2|
 [ResNet V1 101](https://arxiv.org/abs/1512.03385)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v1.py)|[resnet_v1_101_2016_08_28.tar.gz](http://download.tensorflow.org/models/resnet_v1_101_2016_08_28.tar.gz)|76.4|92.9|
 [ResNet V1 152](https://arxiv.org/abs/1512.03385)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v1.py)|[resnet_v1_152_2016_08_28.tar.gz](http://download.tensorflow.org/models/resnet_v1_152_2016_08_28.tar.gz)|76.8|93.2|
-[ResNet V2 50](https://arxiv.org/abs/1603.05027)^|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v2.py)|[resnet_v2_50_2017_04_14.tar.gz](http://download.tensorflow.org/models/resnet_v2_50_2017_04_14.tar.gz)|75.6|92.8|
-[ResNet V2 101](https://arxiv.org/abs/1603.05027)^|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v2.py)|[resnet_v2_101_2017_04_14.tar.gz](http://download.tensorflow.org/models/resnet_v2_101_2017_04_14.tar.gz)|77.0|93.7|
-[ResNet V2 152](https://arxiv.org/abs/1603.05027)^|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v2.py)|[resnet_v2_152_2017_04_14.tar.gz](http://download.tensorflow.org/models/resnet_v2_152_2017_04_14.tar.gz)|77.8|94.1|
-[ResNet V2 200](https://arxiv.org/abs/1603.05027)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v2.py)|[TBA]()|79.9\*|95.2\*|
+[ResNet V2 50](https://arxiv.org/abs/1603.05027)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v2.py)|[resnet_v2_50_2017_04_14.tar.gz](http://download.tensorflow.org/models/resnet_v2_50_2017_04_14.tar.gz)|75.6|92.8|
+[ResNet V2 101](https://arxiv.org/abs/1603.05027)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v2.py)|[resnet_v2_101_2017_04_14.tar.gz](http://download.tensorflow.org/models/resnet_v2_101_2017_04_14.tar.gz)|77.0|93.7|
+[ResNet V2 152](https://arxiv.org/abs/1603.05027)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/resnet_v2.py)|[resnet_v2_152_2017_04_14.tar.gz](http://download.tensorflow.org/models/resnet_v2_152_2017_04_14.tar.gz)|77.8|94.1|
 [VGG 16](http://arxiv.org/abs/1409.1556.pdf)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/vgg.py)|[vgg_16_2016_08_28.tar.gz](http://download.tensorflow.org/models/vgg_16_2016_08_28.tar.gz)|71.5|89.8|
 [VGG 19](http://arxiv.org/abs/1409.1556.pdf)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/vgg.py)|[vgg_19_2016_08_28.tar.gz](http://download.tensorflow.org/models/vgg_19_2016_08_28.tar.gz)|71.1|89.8|
 [MobileNet_v1_1.0_224](https://arxiv.org/pdf/1704.04861.pdf)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet_v1.py)|[mobilenet_v1_1.0_224.tgz](http://download.tensorflow.org/models/mobilenet_v1_2018_02_22/mobilenet_v1_1.0_224.tgz)|70.9|89.9|
 [MobileNet_v1_0.50_160](https://arxiv.org/pdf/1704.04861.pdf)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet_v1.py)|[mobilenet_v1_0.50_160.tgz](http://download.tensorflow.org/models/mobilenet_v1_2018_02_22/mobilenet_v1_0.5_160.tgz)|59.1|81.9|
 [MobileNet_v1_0.25_128](https://arxiv.org/pdf/1704.04861.pdf)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet_v1.py)|[mobilenet_v1_0.25_128.tgz](http://download.tensorflow.org/models/mobilenet_v1_2018_02_22/mobilenet_v1_0.25_128.tgz)|41.5|66.3|
-[MobileNet_v2_1.4_224^*](https://arxiv.org/abs/1801.04381)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet_v2.py)| [mobilenet_v2_1.4_224.tgz](https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.4_224.tgz) | 74.9 | 92.5|
-[MobileNet_v2_1.0_224^*](https://arxiv.org/abs/1801.04381)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet_v2.py)| [mobilenet_v2_1.0_224.tgz](https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.0_224.tgz) | 71.9 | 91.0
-[NASNet-A_Mobile_224](https://arxiv.org/abs/1707.07012)#|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/nasnet/nasnet.py)|[nasnet-a_mobile_04_10_2017.tar.gz](https://storage.googleapis.com/download.tensorflow.org/models/nasnet-a_mobile_04_10_2017.tar.gz)|74.0|91.6|
-[NASNet-A_Large_331](https://arxiv.org/abs/1707.07012)#|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/nasnet/nasnet.py)|[nasnet-a_large_04_10_2017.tar.gz](https://storage.googleapis.com/download.tensorflow.org/models/nasnet-a_large_04_10_2017.tar.gz)|82.7|96.2|
+[MobileNet_v2_1.4_224](https://arxiv.org/abs/1801.04381)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet_v2.py)| [mobilenet_v2_1.4_224.tgz](https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.4_224.tgz) | 74.9 | 92.5|
+[MobileNet_v2_1.0_224](https://arxiv.org/abs/1801.04381)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet_v2.py)| [mobilenet_v2_1.0_224.tgz](https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.0_224.tgz) | 71.9 | 91.0
+[NASNet-A_Mobile_224](https://arxiv.org/abs/1707.07012)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/nasnet/nasnet.py)|[nasnet-a_mobile_04_10_2017.tar.gz](https://storage.googleapis.com/download.tensorflow.org/models/nasnet-a_mobile_04_10_2017.tar.gz)|74.0|91.6|
+[NASNet-A_Large_331](https://arxiv.org/abs/1707.07012)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/nasnet/nasnet.py)|[nasnet-a_large_04_10_2017.tar.gz](https://storage.googleapis.com/download.tensorflow.org/models/nasnet-a_large_04_10_2017.tar.gz)|82.7|96.2|
 [PNASNet-5_Large_331](https://arxiv.org/abs/1712.00559)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/nasnet/pnasnet.py)|[pnasnet-5_large_2017_12_13.tar.gz](https://storage.googleapis.com/download.tensorflow.org/models/pnasnet-5_large_2017_12_13.tar.gz)|82.9|96.2|
 [PNASNet-5_Mobile_224](https://arxiv.org/abs/1712.00559)|[Code](https://github.com/tensorflow/models/blob/master/research/slim/nets/nasnet/pnasnet.py)|[pnasnet-5_mobile_2017_12_13.tar.gz](https://storage.googleapis.com/download.tensorflow.org/models/pnasnet-5_mobile_2017_12_13.tar.gz)|74.2|91.9|
 
-^ ResNet V2 models use Inception pre-processing and input image size of 299 (use
+ResNet V2 models use Inception pre-processing and input image size of 299 (use
 `--preprocessing_name inception --eval_image_size 299` when using
 `eval_image_classifier.py`). Performance numbers for ResNet V2 models are
 reported on the ImageNet validation set.
 
-(#) More information and details about the NASNet architectures are available at this [README](nets/nasnet/README.md)
+More information and details about the NASNet architectures are available at this [README](nets/nasnet/README.md)
 
 All 16 float MobileNet V1 models reported in the [MobileNet Paper](https://arxiv.org/abs/1704.04861) and all
 16 quantized [TensorFlow Lite](https://www.tensorflow.org/mobile/tflite/) compatible MobileNet V1 models can be found
-[here](https://github.com/tensorflow/models/tree/master/research/slim/nets/mobilenet_v1.md).
-
-(^#) More details on MobileNetV2 models can be found [here](nets/mobilenet/README.md).
-
-(\*): Results quoted from the [paper](https://arxiv.org/abs/1603.05027).
+[here](https://github.com/tensorflow/models/tree/master/research/slim/nets/mobilenet_v1.md). More details on MobileNetV2 models can be found [here](nets/mobilenet/README.md).
 
 Here is an example of how to download the Inception V3 checkpoint:
 
@@ -293,8 +229,6 @@ $ mv inception_v3.ckpt ${CHECKPOINT_DIR}
 $ rm inception_v3_2016_08_28.tar.gz
 ```
 
-
-
 # Training a model from scratch.
 <a id='Training'></a>
 
@@ -306,10 +240,10 @@ parameters on the ImageNet dataset.
 DATASET_DIR=/tmp/imagenet
 TRAIN_DIR=/tmp/train_logs
 python train_image_classifier.py \
+    --dataset_dir=${DATASET_DIR} \
     --train_dir=${TRAIN_DIR} \
     --dataset_name=imagenet \
     --dataset_split_name=train \
-    --dataset_dir=${DATASET_DIR} \
     --model_name=inception_v3
 ```
 
@@ -328,8 +262,6 @@ by running the command below.
 ```shell
 tensorboard --logdir=${TRAIN_DIR}
 ```
-
-Once TensorBoard is running, navigate your web browser to http://localhost:6006.
 
 # Fine-tuning a model from an existing checkpoint
 <a id='Tuning'></a>
