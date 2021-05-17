@@ -14,6 +14,7 @@ from vision.image_classification.slim.nets import mobilenet_v1
 class MobilenetV1Test(tf.test.TestCase):
 
   def testBuildClassificationNetwork(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = 1000
@@ -29,6 +30,7 @@ class MobilenetV1Test(tf.test.TestCase):
                          [batch_size, num_classes])
 
   def testBuildPreLogitsNetwork(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = None
@@ -41,6 +43,7 @@ class MobilenetV1Test(tf.test.TestCase):
     self.assertFalse('Predictions' in end_points)
 
   def testBuildBaseNetwork(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
 
@@ -66,6 +69,7 @@ class MobilenetV1Test(tf.test.TestCase):
     self.assertItemsEqual(end_points.keys(), expected_endpoints)
 
   def testBuildOnlyUptoFinalEndpoint(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     endpoints = ['Conv2d_0',
@@ -92,6 +96,7 @@ class MobilenetV1Test(tf.test.TestCase):
         self.assertItemsEqual(endpoints[:index + 1], end_points.keys())
 
   def testBuildCustomNetworkUsingConvDefs(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     conv_defs = [
@@ -114,6 +119,7 @@ class MobilenetV1Test(tf.test.TestCase):
     self.assertItemsEqual(end_points.keys(), expected_endpoints)
 
   def testBuildAndCheckAllEndPointsUptoConv2d_13(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
 
@@ -166,6 +172,7 @@ class MobilenetV1Test(tf.test.TestCase):
           expected_shape)
 
   def testOutputStride16BuildAndCheckAllEndPointsUptoConv2d_13(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     output_stride = 16
@@ -220,6 +227,7 @@ class MobilenetV1Test(tf.test.TestCase):
           expected_shape)
 
   def testOutputStride8BuildAndCheckAllEndPointsUptoConv2d_13(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     output_stride = 8
@@ -274,6 +282,7 @@ class MobilenetV1Test(tf.test.TestCase):
           expected_shape)
 
   def testBuildAndCheckAllEndPointsApproximateFaceNet(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 128, 128
 
@@ -327,6 +336,7 @@ class MobilenetV1Test(tf.test.TestCase):
           expected_shape)
 
   def testModelHasExpectedNumberOfParameters(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     inputs = tf.random.uniform((batch_size, height, width, 3))
@@ -338,6 +348,7 @@ class MobilenetV1Test(tf.test.TestCase):
       self.assertAlmostEqual(3217920, total_params)
 
   def testBuildEndPointsWithDepthMultiplierLessThanOne(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = 1000
@@ -357,6 +368,7 @@ class MobilenetV1Test(tf.test.TestCase):
       self.assertEqual(0.5 * original_depth, new_depth)
 
   def testBuildEndPointsWithDepthMultiplierGreaterThanOne(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = 1000
@@ -377,6 +389,7 @@ class MobilenetV1Test(tf.test.TestCase):
       self.assertEqual(2.0 * original_depth, new_depth)
 
   def testRaiseValueErrorWithInvalidDepthMultiplier(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = 1000
@@ -390,6 +403,7 @@ class MobilenetV1Test(tf.test.TestCase):
           inputs, num_classes, depth_multiplier=0.0)
 
   def testHalfSizeImages(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 112, 112
     num_classes = 1000
@@ -443,6 +457,7 @@ class MobilenetV1Test(tf.test.TestCase):
       self.assertListEqual(list(pre_pool_out.shape), [batch_size, 8, 10, 1024])
 
   def testUnknowBatchSize(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 1
     height, width = 224, 224
     num_classes = 1000
@@ -460,6 +475,7 @@ class MobilenetV1Test(tf.test.TestCase):
       self.assertEquals(output.shape, (batch_size, num_classes))
 
   def testEvaluation(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 2
     height, width = 224, 224
     num_classes = 1000
@@ -475,6 +491,7 @@ class MobilenetV1Test(tf.test.TestCase):
       self.assertEquals(output.shape, (batch_size,))
 
   def testTrainEvalWithReuse(self):
+    tf.compat.v1.disable_v2_behavior()
     train_batch_size = 5
     eval_batch_size = 2
     height, width = 150, 150
@@ -493,6 +510,7 @@ class MobilenetV1Test(tf.test.TestCase):
       self.assertEquals(output.shape, (eval_batch_size,))
 
   def testLogitsNotSqueezed(self):
+    tf.compat.v1.disable_v2_behavior()
     num_classes = 25
     images = tf.random.uniform([1, 224, 224, 3])
     logits, _ = mobilenet_v1.mobilenet_v1(images,
@@ -505,11 +523,13 @@ class MobilenetV1Test(tf.test.TestCase):
       self.assertListEqual(list(logits_out.shape), [1, 1, 1, num_classes])
 
   def testBatchNormScopeDoesNotHaveIsTrainingWhenItsSetToNone(self):
+    tf.compat.v1.disable_v2_behavior()
     sc = mobilenet_v1.mobilenet_v1_arg_scope(is_training=None)
     self.assertNotIn('is_training', sc[slim.arg_scope_func_key(
         slim.batch_norm)])
 
   def testBatchNormScopeDoesHasIsTrainingWhenItsNotNone(self):
+    tf.compat.v1.disable_v2_behavior()
     sc = mobilenet_v1.mobilenet_v1_arg_scope(is_training=True)
     self.assertIn('is_training', sc[slim.arg_scope_func_key(slim.batch_norm)])
     sc = mobilenet_v1.mobilenet_v1_arg_scope(is_training=False)
@@ -518,5 +538,4 @@ class MobilenetV1Test(tf.test.TestCase):
     self.assertIn('is_training', sc[slim.arg_scope_func_key(slim.batch_norm)])
 
 if __name__ == '__main__':
-  tf.compat.v1.disable_v2_behavior()
   tf.test.main()

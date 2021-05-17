@@ -109,11 +109,22 @@ def build_model():
           tf.compat.v1.train.replica_device_setter(FLAGS.ps_tasks)):
     inputs, labels = imagenet_input(is_training=True)
     with slim.arg_scope(mobilenet_v1.mobilenet_v1_arg_scope(is_training=True)):
-      logits, _ = mobilenet_v1.mobilenet_v1(
+      logits, end_points = mobilenet_v1.mobilenet_v1(
           inputs,
           is_training=True,
           depth_multiplier=FLAGS.depth_multiplier,
           num_classes=FLAGS.num_classes)
+
+    # Print name and shape of each tensor.
+    print("Layers")
+    for k, v in end_points.items():
+        print('name = {}, shape = {}'.format(v.name, v.get_shape()))
+
+    # Print name and shape of parameter nodes  (values not yet initialized)
+    print("\n")
+    print("Parameters")
+    for v in slim.get_model_variables():
+        print('name = {}, shape = {}'.format(v.name, v.get_shape()))
 
     tf.compat.v1.losses.softmax_cross_entropy(labels, logits)
 

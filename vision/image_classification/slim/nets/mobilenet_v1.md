@@ -83,7 +83,7 @@ $ mv mobilenet_v1_1.0_224.ckpt.* ${CHECKPOINT_DIR}
 
 # MobileNet V1 scripts
 
-This package contains scripts for training floating point and eight-bit fixed
+This package contains scripts for training float point and eight-bit fixed
 point TensorFlow models.
 
 Quantization tools used are described [here](https://github.com/tensorflow/tensorflow/tree/r1.15/tensorflow/contrib/quantize).
