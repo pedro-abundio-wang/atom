@@ -504,11 +504,11 @@ def main(_):
 
         # Add summaries for losses.
         for loss in tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.LOSSES, first_clone_scope):
-            summaries.add(tf.summary.scalar('losses/%s' % loss.op.name, loss))
+            summaries.add(tf.compat.v1.summary.scalar('losses/%s' % loss.op.name, loss))
 
         # Add summaries for variables.
         for variable in slim.get_model_variables():
-            summaries.add(tf.summary.histogram(variable.op.name, variable))
+            summaries.add(tf.compat.v1.summary.histogram(variable.op.name, variable))
 
         #################################
         # Configure the moving averages #
@@ -526,7 +526,7 @@ def main(_):
         with tf.device(deploy_config.optimizer_device()):
             learning_rate = _configure_learning_rate(dataset.num_samples, global_step)
             optimizer = _configure_optimizer(learning_rate)
-            summaries.add(tf.summary.scalar('learning_rate', learning_rate))
+            summaries.add(tf.compat.v1.summary.scalar('learning_rate', learning_rate))
 
         if FLAGS.sync_replicas:
             # If sync_replicas is enabled, the averaging will be done in the chief
@@ -550,7 +550,7 @@ def main(_):
             optimizer,
             var_list=variables_to_train)
         # Add total_loss to summary.
-        summaries.add(tf.summary.scalar('total_loss', total_loss))
+        summaries.add(tf.compat.v1.summary.scalar('total_loss', total_loss))
 
         # Create gradient updates.
         grad_updates = optimizer.apply_gradients(clones_gradients,
