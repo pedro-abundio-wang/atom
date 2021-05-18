@@ -499,9 +499,8 @@ def main(_):
         end_points = clones[0].outputs
         for end_point in end_points:
             x = end_points[end_point]
-            summaries.add(tf.summary.histogram('activations/' + end_point, x))
-            summaries.add(tf.summary.scalar('sparsity/' + end_point,
-                                            tf.nn.zero_fraction(x)))
+            summaries.add(tf.compat.v1.summary.histogram('activations/' + end_point, x))
+            summaries.add(tf.compat.v1.summary.scalar('sparsity/' + end_point, tf.nn.zero_fraction(x)))
 
         # Add summaries for losses.
         for loss in tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.LOSSES, first_clone_scope):
