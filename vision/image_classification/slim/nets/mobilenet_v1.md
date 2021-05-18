@@ -105,7 +105,7 @@ $ mobilenet_v1_train.py --dataset_dir "path/to/dataset" --checkpoint_dir "path/t
 Eval:
 
 ```
-$ mobilenet_v1_eval.py --dataset_dir "path/to/dataset" --checkpoint_dir "path/to/checkpoints"
+$ mobilenet_v1_eval.py --dataset_dir "path/to/dataset" --checkpoint_dir "path/to/checkpoints/model.ckpt-xxxxxx"
 ```
 
 ### Quantized Training and Eval
