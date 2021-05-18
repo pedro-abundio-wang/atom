@@ -84,7 +84,7 @@ def metrics(logits, labels):
       'Recall_5':
           tf.compat.v1.metrics.recall_at_k(labels, logits, 5),
   })
-  for name, value in names_to_values.iteritems():
+  for name, value in names_to_values.items():
     slim.summaries.add_scalar_summary(
         value, name, prefix='eval', print_summary=True)
   return names_to_updates.values()
@@ -130,7 +130,7 @@ def eval_model():
         FLAGS.checkpoint_dir,
         logdir=FLAGS.eval_dir,
         num_evals=num_batches,
-        eval_op=eval_ops)
+        eval_op=list(eval_ops))
 
 
 def main(_):
