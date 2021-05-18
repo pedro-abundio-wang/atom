@@ -587,7 +587,7 @@ def main(_):
 
 
 if __name__ == '__main__':
+    tf.compat.v1.disable_v2_behavior()
     logging.set_verbosity(logging.INFO)
     define_classifier_flags()
-
     app.run(main)
