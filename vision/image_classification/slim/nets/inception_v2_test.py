@@ -1,17 +1,3 @@
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Tests for nets.inception_v2."""
 
 from __future__ import absolute_import
@@ -19,15 +5,16 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import tf_slim as slim
 
-from nets import inception
+from vision.image_classification.slim.nets import inception
 
 
 class InceptionV2Test(tf.test.TestCase):
 
   def testBuildClassificationNetwork(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = 1000
@@ -43,6 +30,7 @@ class InceptionV2Test(tf.test.TestCase):
                          [batch_size, num_classes])
 
   def testBuildPreLogitsNetwork(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = None
@@ -55,6 +43,7 @@ class InceptionV2Test(tf.test.TestCase):
     self.assertFalse('Predictions' in end_points)
 
   def testBuildBaseNetwork(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
 
@@ -71,6 +60,7 @@ class InceptionV2Test(tf.test.TestCase):
     self.assertItemsEqual(list(end_points.keys()), expected_endpoints)
 
   def testBuildOnlyUptoFinalEndpoint(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     endpoints = ['Conv2d_1a_7x7', 'MaxPool_2a_3x3', 'Conv2d_2b_1x1',
@@ -87,6 +77,7 @@ class InceptionV2Test(tf.test.TestCase):
         self.assertItemsEqual(endpoints[:index + 1], list(end_points.keys()))
 
   def testBuildAndCheckAllEndPointsUptoMixed5c(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
 
@@ -117,6 +108,7 @@ class InceptionV2Test(tf.test.TestCase):
                            expected_shape)
 
   def testModelHasExpectedNumberOfParameters(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     inputs = tf.random.uniform((batch_size, height, width, 3))
@@ -127,6 +119,7 @@ class InceptionV2Test(tf.test.TestCase):
     self.assertAlmostEqual(10173112, total_params)
 
   def testBuildEndPointsWithDepthMultiplierLessThanOne(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = 1000
@@ -147,6 +140,7 @@ class InceptionV2Test(tf.test.TestCase):
       self.assertEqual(0.5 * original_depth, new_depth)
 
   def testBuildEndPointsWithDepthMultiplierGreaterThanOne(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = 1000
@@ -167,6 +161,7 @@ class InceptionV2Test(tf.test.TestCase):
       self.assertEqual(2.0 * original_depth, new_depth)
 
   def testRaiseValueErrorWithInvalidDepthMultiplier(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
     num_classes = 1000
@@ -178,6 +173,7 @@ class InceptionV2Test(tf.test.TestCase):
       _ = inception.inception_v2(inputs, num_classes, depth_multiplier=0.0)
 
   def testBuildEndPointsWithUseSeparableConvolutionFalse(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
 
@@ -201,6 +197,7 @@ class InceptionV2Test(tf.test.TestCase):
       self.assertListEqual(original_shape, new_shape)
 
   def testBuildEndPointsNCHWDataFormat(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
 
@@ -226,6 +223,7 @@ class InceptionV2Test(tf.test.TestCase):
       self.assertListEqual(transposed_original_shape, new_shape)
 
   def testBuildErrorsForDataFormats(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 224, 224
 
@@ -240,6 +238,7 @@ class InceptionV2Test(tf.test.TestCase):
       _ = inception.inception_v2_base(inputs, data_format='NCHW')
 
   def testHalfSizeImages(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 112, 112
     num_classes = 1000
@@ -254,6 +253,7 @@ class InceptionV2Test(tf.test.TestCase):
                          [batch_size, 4, 4, 1024])
 
   def testBuildBaseNetworkWithoutRootBlock(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 5
     height, width = 28, 28
     channels = 192
@@ -282,13 +282,14 @@ class InceptionV2Test(tf.test.TestCase):
                            expected_shape)
 
   def testUnknownImageShape(self):
-    tf.reset_default_graph()
+    tf.compat.v1.disable_v2_behavior()
+    tf.compat.v1.reset_default_graph()
     batch_size = 2
     height, width = 224, 224
     num_classes = 1000
     input_np = np.random.uniform(0, 1, (batch_size, height, width, 3))
     with self.test_session() as sess:
-      inputs = tf.placeholder(
+      inputs = tf.compat.v1.placeholder(
           tf.float32, shape=(batch_size, None, None, 3))
       logits, end_points = inception.inception_v2(inputs, num_classes)
       self.assertTrue(logits.op.name.startswith('InceptionV2/Logits'))
@@ -296,18 +297,19 @@ class InceptionV2Test(tf.test.TestCase):
                            [batch_size, num_classes])
       pre_pool = end_points['Mixed_5c']
       feed_dict = {inputs: input_np}
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       pre_pool_out = sess.run(pre_pool, feed_dict=feed_dict)
       self.assertListEqual(list(pre_pool_out.shape), [batch_size, 7, 7, 1024])
 
   def testGlobalPoolUnknownImageShape(self):
-    tf.reset_default_graph()
+    tf.compat.v1.disable_v2_behavior()
+    tf.compat.v1.reset_default_graph()
     batch_size = 1
     height, width = 250, 300
     num_classes = 1000
     input_np = np.random.uniform(0, 1, (batch_size, height, width, 3))
     with self.test_session() as sess:
-      inputs = tf.placeholder(
+      inputs = tf.compat.v1.placeholder(
           tf.float32, shape=(batch_size, None, None, 3))
       logits, end_points = inception.inception_v2(inputs, num_classes,
                                                   global_pool=True)
@@ -316,16 +318,17 @@ class InceptionV2Test(tf.test.TestCase):
                            [batch_size, num_classes])
       pre_pool = end_points['Mixed_5c']
       feed_dict = {inputs: input_np}
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       pre_pool_out = sess.run(pre_pool, feed_dict=feed_dict)
       self.assertListEqual(list(pre_pool_out.shape), [batch_size, 8, 10, 1024])
 
   def testUnknowBatchSize(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 1
     height, width = 224, 224
     num_classes = 1000
 
-    inputs = tf.placeholder(tf.float32, (None, height, width, 3))
+    inputs = tf.compat.v1.placeholder(tf.float32, (None, height, width, 3))
     logits, _ = inception.inception_v2(inputs, num_classes)
     self.assertTrue(logits.op.name.startswith('InceptionV2/Logits'))
     self.assertListEqual(logits.get_shape().as_list(),
@@ -333,11 +336,12 @@ class InceptionV2Test(tf.test.TestCase):
     images = tf.random.uniform((batch_size, height, width, 3))
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       output = sess.run(logits, {inputs: images.eval()})
       self.assertEquals(output.shape, (batch_size, num_classes))
 
   def testEvaluation(self):
+    tf.compat.v1.disable_v2_behavior()
     batch_size = 2
     height, width = 224, 224
     num_classes = 1000
@@ -348,11 +352,12 @@ class InceptionV2Test(tf.test.TestCase):
     predictions = tf.argmax(input=logits, axis=1)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       output = sess.run(predictions)
       self.assertEquals(output.shape, (batch_size,))
 
   def testTrainEvalWithReuse(self):
+    tf.compat.v1.disable_v2_behavior()
     train_batch_size = 5
     eval_batch_size = 2
     height, width = 150, 150
@@ -365,11 +370,12 @@ class InceptionV2Test(tf.test.TestCase):
     predictions = tf.argmax(input=logits, axis=1)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       output = sess.run(predictions)
       self.assertEquals(output.shape, (eval_batch_size,))
 
   def testLogitsNotSqueezed(self):
+    tf.compat.v1.disable_v2_behavior()
     num_classes = 25
     images = tf.random.uniform([1, 224, 224, 3])
     logits, _ = inception.inception_v2(images,
@@ -377,32 +383,34 @@ class InceptionV2Test(tf.test.TestCase):
                                        spatial_squeeze=False)
 
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       logits_out = sess.run(logits)
       self.assertListEqual(list(logits_out.shape), [1, 1, 1, num_classes])
 
   def testNoBatchNormScaleByDefault(self):
+    tf.compat.v1.disable_v2_behavior()
     height, width = 224, 224
     num_classes = 1000
-    inputs = tf.placeholder(tf.float32, (1, height, width, 3))
+    inputs = tf.compat.v1.placeholder(tf.float32, (1, height, width, 3))
     with slim.arg_scope(inception.inception_v2_arg_scope()):
       inception.inception_v2(inputs, num_classes, is_training=False)
 
-    self.assertEqual(tf.global_variables('.*/BatchNorm/gamma:0$'), [])
+    self.assertEqual(tf.compat.v1.global_variables('.*/BatchNorm/gamma:0$'), [])
 
   def testBatchNormScale(self):
+    tf.compat.v1.disable_v2_behavior()
     height, width = 224, 224
     num_classes = 1000
-    inputs = tf.placeholder(tf.float32, (1, height, width, 3))
+    inputs = tf.compat.v1.placeholder(tf.float32, (1, height, width, 3))
     with slim.arg_scope(
         inception.inception_v2_arg_scope(batch_norm_scale=True)):
       inception.inception_v2(inputs, num_classes, is_training=False)
 
     gamma_names = set(
         v.op.name
-        for v in tf.global_variables('.*/BatchNorm/gamma:0$'))
+        for v in tf.compat.v1.global_variables('.*/BatchNorm/gamma:0$'))
     self.assertGreater(len(gamma_names), 0)
-    for v in tf.global_variables('.*/BatchNorm/moving_mean:0$'):
+    for v in tf.compat.v1.global_variables('.*/BatchNorm/moving_mean:0$'):
       self.assertIn(v.op.name[:-len('moving_mean')] + 'gamma', gamma_names)
 
 

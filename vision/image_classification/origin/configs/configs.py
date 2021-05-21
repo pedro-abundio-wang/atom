@@ -111,7 +111,7 @@ class ResNet50ImagenetConfig(base_configs.ExperimentConfig):
 
 
 @dataclasses.dataclass
-class GooglenetImagenetConfig(base_configs.ExperimentConfig):
+class InceptionV1ImagenetConfig(base_configs.ExperimentConfig):
     """Base configuration to train resnet-50 on ImageNet."""
     export: base_configs.ExportConfig = base_configs.ExportConfig()
     runtime: base_configs.RuntimeConfig = base_configs.RuntimeConfig()
@@ -334,7 +334,7 @@ def get_config(model: str, dataset: str) -> base_configs.ExperimentConfig:
             'alexnet': AlexNetImagenetConfig(),
             'resnet18': ResNet18ImagenetConfig(),
             'resnet50': ResNet50ImagenetConfig(),
-            'googlenet': GooglenetImagenetConfig(),
+            'inceptionV1': InceptionV1ImagenetConfig(),
             'resnet18v2': ResNet18V2ImagenetConfig(),
             'resnet50v2': ResNet50V2ImagenetConfig(),
             'vgg16': Vgg16ImagenetConfig(),

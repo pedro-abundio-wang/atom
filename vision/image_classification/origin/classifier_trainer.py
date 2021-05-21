@@ -28,7 +28,7 @@ from vision.image_classification.origin.configs import configs
 from benchmark.models import resnet_common
 
 from vision.image_classification.origin.alexnet import alexnet_model
-from vision.image_classification.origin.inception import googlenet_model
+from vision.image_classification.origin.inception import inceptionV1_model
 from vision.image_classification.origin.resnet import resnet18v2_model
 from vision.image_classification.origin.resnet import resnet50v2_model, resnet18_model, resnet50_model
 from vision.image_classification.origin.vgg import vgg16_model, vgg19_model
@@ -42,7 +42,7 @@ def get_models() -> Mapping[str, tf.keras.Model]:
         'alexnet': alexnet_model.alexnet,
         'resnet18': resnet18_model.resnet18,
         'resnet50': resnet50_model.resnet50,
-        'googlenet': googlenet_model.googlenet,
+        'inceptionV1': inceptionV1_model.inceptionV1,
         'resnet18v2': resnet18v2_model.resnet18v2,
         'resnet50v2': resnet50v2_model.resnet50v2,
         'vgg16': vgg16_model.vgg16,

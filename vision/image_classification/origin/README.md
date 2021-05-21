@@ -42,7 +42,7 @@ compile/fit methods for image classification models, including:
     * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100
     * loss: 2.5177 - accuracy: 0.6495 - top_5_accuracy: 0.8491
     * val_loss: 2.3493 - val_accuracy: 0.6777 - val_top_5_accuracy: 0.8817
-  * GoogLeNet
+  * InceptionV1(GoogLeNet)
     * Framework: Tensorflow    
     * Total params: 7,027,672
     * Trainable params: 7,013,112
@@ -50,9 +50,11 @@ compile/fit methods for image classification models, including:
     * batch_size=256, dtype=mixed_float16, epochs=90, 15min/epoch, TeslaV100
     * loss: 2.8186 - accuracy: 0.6290 - top_5_accuracy: 0.8353
     * val_loss: 2.5143 - val_accuracy: 0.6864 - val_top_5_accuracy: 0.8859
+  * InceptionV2 [Slim]
+  * InceptionV3 [Slim]
+  * InceptionV4 [Slim]
+  * Inception-ResNet-V2 [Slim]
   * Xception
-  * Inception
-  * Inception-ResNet
   * Vgg16
     * Framework: Tensorflow    
     * Total params: 138,407,208
@@ -82,6 +84,8 @@ compile/fit methods for image classification models, including:
     * val_loss: 3.7074 - val_accuracy: 0.3877 - val_top_5_accuracy: 0.6285
   * MobileNet
   * EfficientNet
+  * NASNet
+  * PNASNet
 
 ### ImageNet preparation
 

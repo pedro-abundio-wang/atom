@@ -2,7 +2,6 @@
 
 Related papers:
 - https://arxiv.org/abs/1409.4842
-- https://arxiv.org/abs/1502.03167
 
 """
 
@@ -136,8 +135,8 @@ def inception_block(input_tensor,
     return x
 
 
-def googlenet(num_classes,
-              batch_size=None):
+def inceptionV1(num_classes,
+                batch_size=None):
     """Instantiates the GoogLeNet architecture.
 
     Arguments:
