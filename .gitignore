@@ -130,6 +130,3 @@ dmypy.json
 # idea
 .idea
 *.iml
-
-vision/neural_style_transfer/iob_nst/nst
-vision/neural_style_transfer/iob_nst/vis

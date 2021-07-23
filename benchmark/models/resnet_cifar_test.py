@@ -13,7 +13,7 @@ from tensorflow.python.platform import googletest
 from benchmark.models import resnet_cifar_main
 from utils.misc import keras_utils
 from utils.testing import integration
-from vision.image_classification.origin.cifar import cifar10_preprocessing
+from vision.image_classification.cifar import cifar10_preprocessing
 
 
 class KerasCifarTest(googletest.TestCase):
