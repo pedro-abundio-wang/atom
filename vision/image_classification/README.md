@@ -7,7 +7,7 @@ compile/fit methods for image classification models, including:
     * Total params: 62,416,616
     * Trainable params: 62,397,480
     * Non-trainable params: 19,136
-    * batch_size=256, dtype=mixed_float16, epochs=90, 5min/epoch, TeslaV100
+    * batch_size=256, dtype=mixed_float16, epochs=90, 5min/epoch, TeslaV100-32G
     * loss: 3.4691 - accuracy: 0.4957 - top_5_accuracy: 0.7323
     * val_loss: 3.0748 - val_accuracy: 0.5704 - val_top_5_accuracy: 0.8056
   * ResNet18
@@ -15,7 +15,7 @@ compile/fit methods for image classification models, including:
     * Total params: 11,708,328
     * Trainable params: 11,698,600
     * Non-trainable params: 9,728
-    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100-32G
     * loss: 2.7720 - accuracy: 0.6427 - top_5_accuracy: 0.8429
     * val_loss: 2.6050 - val_accuracy: 0.6700 - val_top_5_accuracy: 0.8755
   * ResNet50
@@ -23,15 +23,14 @@ compile/fit methods for image classification models, including:
     * Total params: 25,636,712
     * Trainable params: 25,583,592
     * Non-trainable params: 53,120
-    * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100
-    * loss: 2.4390 - accuracy: 0.7356 - top_5_accuracy: 0.8999
-    * val_loss: 2.3760 - val_accuracy: 0.7373 - val_top_5_accuracy: 0.9157
+    * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100-32G
+    * OOM
   * ResNet18V2
     * Framework: Tensorflow    
     * Total params: 11,700,648
     * Trainable params: 11,692,840
     * Non-trainable params: 7,808
-    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100-32G
     * loss: 2.8414 - accuracy: 0.5777 - top_5_accuracy: 0.7967
     * val_loss: 2.6130 - val_accuracy: 0.6187 - val_top_5_accuracy: 0.8403
   * ResNet50V2
@@ -39,15 +38,14 @@ compile/fit methods for image classification models, including:
     * Total params: 25,613,800
     * Trainable params: 25,568,360
     * Non-trainable params: 45,440
-    * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100
-    * loss: 2.5177 - accuracy: 0.6495 - top_5_accuracy: 0.8491
-    * val_loss: 2.3493 - val_accuracy: 0.6777 - val_top_5_accuracy: 0.8817
+    * batch_size=256, dtype=mixed_float16, epochs=90, 20min/epoch, TeslaV100-32G
+    * OOM
   * InceptionV1(GoogLeNet)
     * Framework: Tensorflow    
     * Total params: 7,027,672
     * Trainable params: 7,013,112
     * Non-trainable params: 14,560
-    * batch_size=256, dtype=mixed_float16, epochs=90, 15min/epoch, TeslaV100
+    * batch_size=256, dtype=mixed_float16, epochs=90, 15min/epoch, TeslaV100-32G
     * loss: 2.8186 - accuracy: 0.6290 - top_5_accuracy: 0.8353
     * val_loss: 2.5143 - val_accuracy: 0.6864 - val_top_5_accuracy: 0.8859
   * InceptionV2 [Slim]
@@ -60,7 +58,7 @@ compile/fit methods for image classification models, including:
     * Total params: 138,407,208
     * Trainable params: 138,382,376
     * Non-trainable params: 24,832
-    * batch_size=256, dtype=mixed_float16, epochs=90, 40min/epoch, TeslaV100
+    * batch_size=256, dtype=mixed_float16, epochs=90, 40min/epoch, TeslaV100-32G
     * loss: 2.7647 - accuracy: 0.6609 - top_5_accuracy: 0.8555
     * val_loss: 2.4864 - val_accuracy: 0.7121 - val_top_5_accuracy: 0.9005
   * Vgg19
@@ -68,7 +66,7 @@ compile/fit methods for image classification models, including:
     * Total params: 143,722,024
     * Trainable params: 143,694,632
     * Non-trainable params: 27,392
-    * batch_size=256, dtype=mixed_float16, epochs=90, 50min/epoch, TeslaV100
+    * batch_size=256, dtype=mixed_float16, epochs=90, 50min/epoch, TeslaV100-32G
     * loss: 2.7129 - accuracy: 0.6726 - top_5_accuracy: 0.8632
     * val_loss: 2.4588 - val_accuracy: 0.7168 - val_top_5_accuracy: 0.9053
   * WideResNet
@@ -80,7 +78,7 @@ compile/fit methods for image classification models, including:
     * Total params: 1,248,424
     * Trainable params: 1,248,424
     * Non-trainable params: 0
-    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100    
+    * batch_size=256, dtype=mixed_float16, epochs=90, 10min/epoch, TeslaV100-32G    
     * loss: 4.0646 - accuracy: 0.3217 - top_5_accuracy: 0.5492 
     * val_loss: 3.7074 - val_accuracy: 0.3877 - val_top_5_accuracy: 0.6285
   * MobileNet
