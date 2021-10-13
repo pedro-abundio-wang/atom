@@ -73,6 +73,7 @@ compile/fit methods for image classification models, including:
     * val_loss: 2.4588 - val_accuracy: 0.7168 - val_top_5_accuracy: 0.9053
   * WideResNet
   * ResNeXt
+  * DenseNet
   * ShuffleNet
   * SqueezeNets
     * Framework: Tensorflow    

@@ -152,10 +152,10 @@ def resnet50v2(num_classes,
     x = layers.ZeroPadding2D(padding=(1, 1))(x)
     x = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
 
-    x = resnet_block(x, size=3, filters=64, stage=2, stride=1)
-    x = resnet_block(x, size=4, filters=128, stage=3)
-    x = resnet_block(x, size=6, filters=256, stage=4)
-    x = resnet_block(x, size=3, filters=512, stage=5)
+    x = resnet_block(x, size=3, filters=256, stage=2, stride=1)
+    x = resnet_block(x, size=4, filters=512, stage=3)
+    x = resnet_block(x, size=6, filters=1024, stage=4)
+    x = resnet_block(x, size=3, filters=2048, stage=5)
 
     x = layers.BatchNormalization(
         axis=bn_axis, name='post_bn')(x)

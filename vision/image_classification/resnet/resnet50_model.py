@@ -230,10 +230,10 @@ def resnet50(num_classes,
     x = layers.Activation('relu')(x)
     x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
 
-    x = resnet_block(x, size=3, kernel_size=3, filters=64, stage=2, conv_strides=(1, 1))
-    x = resnet_block(x, size=4, kernel_size=3, filters=128, stage=3)
-    x = resnet_block(x, size=6, kernel_size=3, filters=256, stage=4)
-    x = resnet_block(x, size=3, kernel_size=3, filters=512, stage=5)
+    x = resnet_block(x, size=3, kernel_size=3, filters=256, stage=2, conv_strides=(1, 1))
+    x = resnet_block(x, size=4, kernel_size=3, filters=512, stage=3)
+    x = resnet_block(x, size=6, kernel_size=3, filters=1024, stage=4)
+    x = resnet_block(x, size=3, kernel_size=3, filters=2048, stage=5)
 
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dense(
